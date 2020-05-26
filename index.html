@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>猫池 - 国内首家CPU挖矿综合服务平台</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="theme-color" content="#efefef" />
+<meta name="description" content="国内首家一站式CPU挖矿综合服务平台，使用先进的算法为用户选择高收益币种进行挖掘，并统一采用门罗币(XMR)付款, 加入猫池, 坐享高收益!">
+<link rel="preload" href="font/GothamCondensed-Medium.woff2" as="font" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="style_min.css" />
+<link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico" />
+<link rel="icon" type="image/png" href="assets/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="assets/favicon-32x32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon-180x180.png" sizes="180x180">
+</head>
+
+<body class="C0bkl">
+<header>
+	<div id="HeadLogo" class="txtmed C2 hov nav noselect" data-tar="home">猫池 - C3Pool</div>
+	<div id="HeadMenu"><select class="txtmed C2 C0bkl"></select><div class="select-point C1fl rot90"></div></div>
+	<div id="TogMode" class="C1fl hov"></div>
+	<div id="Timer" class="hov">
+		<div id="TimerPie" class="C1bk">
+			<div id="TimerDisc" class="C0bkl"></div>
+			<div id="TimerText" class="txttny C1 noselect"></div>
+		</div>
+		<div id="TimerRefresh" class="C2fl C0bkl hide"></div>
+		<div id="TimerLoader" class="C1fl C0bkl preload hide"></div>
+	</div>
+</header>
+<div id="NetStats">
+	<div class="SplitL">
+		<table class="C3l"><tr>
+			<td width="33%" class="center"><span id="WorldHash" class="txtbig">--</span><div class="pbar"></div><a href="https://c3pool.com/uptimes/" class="txttny C2 noselect" target="_blank" title="所有矿池监控">全网算力</a></td>
+			<td width="33%" class="center"><span id="PoolHash" class="txtbig">--</span><div class="pbar"></div><a href="https://status.c3pool.com/" class="txttny C2 noselect" target="_blank" title="矿池运行状态">矿池算力</a></td>
+			<td width="33%" class="center"><span id="CurrEffort" class="txtbig">--</span><div class="pbar"></div><a href="https://c3pool.com/profits/" class="txttny C2 noselect" target="_blank" title="矿池收益监控">幸运度</a></td>
+		</tr></table>
+	</div><div class="SplitR">
+		<table class="C3l"><tr>
+			<td width="33%" class="center"><span id="BlockCount" class="txtbig">--</span><div class="pbar"></div><span class="nav txttny C2 noselect" data-tar="blocks">发现区块</span></td>
+			<td width="33%" class="center"><span id="AccountCount" class="txtbig">--</span><div class="pbar"></div><span class="txttny C2 noselect">矿工</span></td>
+			<td width="33%" class="center"><span id="PaymentsMade" class="txtbig">--</span><div class="pbar"></div><span class="nav txttny C2 noselect" data-tar="payments">已支付</span></td>
+		</tr></table>
+	</div>
+</div>
+<div id="Addr" class="LR85">
+	<div class="SplitL">
+		<table class="C3l"><tr>
+			<td class="hide"><div id="AddrRecent"><select class="C3l C0bkl txttny"></select><div class="select-point C1fl rot90"></div></div></td>
+			<td class="hide"><div id="AddrDelete" class="Btn16 C1fl"></div></td>
+			<td width="99%"><div class="hbar"></div><div id="DashAddrCell"><input id="AddrField" type="text" class="FLDl txt C3l" autofocus></div><div class="hbar"></div></td>
+		</tr></table>
+	</div>
+	<div class="SplitR">
+		<table class="C3l"><tr>
+			<td width="40%"><span id="DashPending" class="txtbig">--</span><div class="pbar"></div><span id="DashPendingLbl" class="txttny C2 noselect">--</span></td>
+			<td width="20%"><div id="DashPayBtn" class="nopoint" title="矿工设置"><div class="Loader C1fl"></div></div></td>
+			<td width="40%"><span id="DashPaid" class="txtbig">--</span><div class="pbar"></div><span id="DashPaidLbl" class="txttny C2 noselect">--</span></td>
+		</tr></table>
+	</div>
+</div>
+<div id="Stage" class="StageFade"></div>
+<div class="footer C0bkgrdl">
+	<div class="hbar"></div>
+	<div id="FootL" class="C2">
+		<a href="https://twitter.com/c3pool_support" target="_blank"><img src="assets/twitter.png" width="40px" height="40px" title="订阅我们的Twitter，获取有关新区块和其他信息的更新！"></a>
+		&nbsp;
+  	        <a href="https://jq.qq.com/?_wv=1027&k=I9at0vFX" target="_blank"><img src="assets/QQ.png" width="40px" height="40px" title="加入我们的QQ社群，获取更多帮助"></a>
+		&nbsp;
+  	        <a href="http://www.qskg.top/" target="_blank"><img src="assets/qskg.png" width="40px" height="40px" title="轻松矿工，为用户创造价值"></a>
+		&nbsp;
+  	        <a href="https://www.mineros.cn/" target="_blank"><img src="assets/mineros.png" width="60px" height="40px" title=">minerOS是基于Linux系统，专门为矿工打造的一款更加稳定、收益更高、操作便捷且可批量操作的专业挖矿管理系统。"></a>
+		&nbsp;
+  	        <a href="https://blockchair.com/zh?from=c3pool" target="_blank"><img src="assets/Blockchair.png" width="60px" height="40px" title="Blockchair是一款通用区块链浏览器和搜索引擎。"></a>
+	</div>
+	<div id="FootR" class="txtmed C2 right"></div>
+	<div class="shim10"></div>
+</div>
+<script type="application/ld+json">
+{
+	  "@context": "http://schema.org",
+	  "@type": "product",
+	  "name": "c3pool.com",
+	  "url": "https://c3pool.com",
+	  "logo": "https://c3pool.com/assets/logo.png",
+	  "category": "monero mining pool",
+	  "audience": "miners"
+}
+</script>
+</body>
+<script type="text/javascript" src="script_min.js"></script>
+<script>
+	init();
+</script>
+</html>
