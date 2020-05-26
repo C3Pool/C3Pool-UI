@@ -15,7 +15,7 @@ The static files are best served on CDN and can have a long cache. This speeds u
 <b>Language and Localization</b><br>
 C3Pool-UI automatically localizes decimals, thousand seperators, percent and time formats based on the users browser settings. Language used in the UI has been organized into a single point of configuration to make translation easier.
 
-There is also an optional font pack provided that extends glyph support to Latin W01 & W02: Albanian (sq), Croatian (hr), Czech (cs), Danish (da), Dutch (nl), English (en), Estonian (et), Finnish (fi), French (fr), German (de), Hungarian (hu), Icelandic (is), Italian (it), Latvian (lv), Lithuanian (lt), Norwegian (nn), Polish (pl), Portuguese (pt), Romanian (ro), Slovak (sk), Slovenian (sl), Spanish (es), Swedish (sv), Turkish (tr), Welsh (cy).
+There is also an optional font pack provided that extends glyph support to Latin W01 & W02: Albanian (sq), Croatian (hr), Czech (cs), Danish (da), Dutch (nl), English (en), Estonian (et), Finnish (fi), French (fr), German (de), Hungarian (hu), Icelandic (is), Italian (it), Latvian (lv), Lithuanian (lt), Norwegian (nn), Polish (pl), Portuguese (pt), Romanian (ro), Slovak (sk), Slovenian (sl), Spanish (es), Swedish (sv), Turkish (tr), Welsh (cy),Chinese(CN).
 
 For additional language support you can substitute your own font with the necessary glyphs in the stylesheet. Any condensed sans-serif font will work fine as a substitute and you can optimize the font file for your needs.
 
