@@ -28,7 +28,7 @@ var	mde = 'l',
 		},
 		pay: {
 			min_auto:	0.005,											//minimum for automatic threshold
-			def_auto:	0.3,											//minimum for automatic threshold
+			def_auto:	0.005,											//minimum for automatic threshold
 			max_fee:	0.0004,											//max fee (for min_auto)
 			zero_fee_pay:	4,											//theshold that makes fee to be zero
 			dec_auto:	4											//decimal places for threshold
@@ -995,15 +995,11 @@ function Dash_load(typ){
 				if($A[addr] && $A[addr].hashes){
 					g.classList.remove('hide');
 					for(var k in $$.pay){
-						var val = $A[addr][$$.pay[k].var], dec = 8;
+						var val = $A[addr][$$.pay[k].var], dec = 6;
 						if(val > 99999){
 							dec = 4;
 						}else if(val > 9999){
 							dec = 5;
-						}else if(val > 999){
-							dec = 6;
-						}else if(val > 99){
-							dec = 7;
 						}
 						document.getElementById(k).innerHTML = '<span title="' + $$.pay[k].tooltip + '">' + Rnd(val, dec, 'txt') + '</span>';
 					}
@@ -1764,8 +1760,8 @@ var api = function(m, key, xid){
 								email:		0,
 								threshold:	''
 							};
-							$A[addr].due    = Rnd((d.amtDue / COINS[mport].divisor), 8);
-							$A[addr].paid   = Rnd((d.amtPaid / COINS[mport].divisor), 8);
+							$A[addr].due    = Rnd(d.amtDue / COINS[mport].divisor, 6, 'txt');
+							$A[addr].paid   = Rnd(d.amtPaid / COINS[mport].divisor, 6, 'txt');
 							$A[addr].hashes = d.totalHashes;
 							$A[addr].hash   = d.hash;
 							$A[addr].hash2  = d.hash2;
