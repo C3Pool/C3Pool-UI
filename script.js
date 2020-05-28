@@ -10,7 +10,7 @@ var	mde = 'l',
 			'back-d':	'313131'	   								//C0 - dark
 		},
 		cur: {
-			nme:	'Monero',						
+			nme:	'XMR钱包',						
 			sym:	'XMR',
 			conf:	30,	// blocks needed to mature
 			port:	18081,
@@ -656,7 +656,7 @@ function init(){
 		$C.AddrField.value = addr;
 		$C.AddrField.blur();
 	}else{
-		$C.AddrField.setAttribute('placeholder', 'Your '+$Q.cur.nme+' Address...');
+		$C.AddrField.setAttribute('placeholder', '填写你的 '+$Q.cur.nme+' 地址...');
 	}
 	
 	if(mde === 'l' && pref && pref.charAt(0) === 'D'){
@@ -1760,8 +1760,8 @@ var api = function(m, key, xid){
 								email:		0,
 								threshold:	''
 							};
-							$A[addr].due    = Rnd(d.amtDue / COINS[mport].divisor, 6, 'txt');
-							$A[addr].paid   = Rnd(d.amtPaid / COINS[mport].divisor, 6, 'txt');
+							$A[addr].due    = Rnd(d.amtDue / COINS[mport].divisor, 8);
+							$A[addr].paid   = Rnd(d.amtPaid / COINS[mport].divisor, 8);
 							$A[addr].hashes = d.totalHashes;
 							$A[addr].hash   = d.hash;
 							$A[addr].hash2  = d.hash2;
