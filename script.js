@@ -43,8 +43,8 @@ var	mde = 'l',
 		},
 		page_sizes: [15, 50, 100],
 		hlp:	{
-			head:	'尊敬的矿工，欢迎您加入 ' + $Q.pool.nme,
-			text:	'入门很容易，并且我们有一个庞大而友好的社群，乐意为您提供帮助. 可以在 <a href="https://jq.qq.com/?_wv=1027&k=p11J9gBD" class="C1 hov">QQ社群</a>, <a href="https://t.me/C3pool_CN" class="C1 hov">Telegram</a> 和 <a href="mailto:support@c3pool.com" class="C1 hov">support@c3pool.com</a>. 请耐心等待，有人会回复您. 大多数情况下，可以在聊天中更快地找到帮助. 我们有一个非常稳定和知识渊博的社群-您可以加入聊天并在那里寻求帮助和友好的聊天^_^'
+			head:	'尊敬的矿工，欢迎您加入国内首家CPU挖矿综合服务平台 ' + $Q.pool.nme,
+			text:	'入门很容易，并且我们有一个庞大而友好的社群，乐意为您提供帮助. 您可以加入 <a href="https://jq.qq.com/?_wv=1027&k=p11J9gBD" class="C1 hov">QQ社群</a>, <a href="https://t.me/C3pool_CN" class="C1 hov">Telegram</a> 和 <a href="mailto:support@c3pool.com" class="C1 hov">support@c3pool.com</a>. 加入后请耐心等待，有人会回复您. 大多数情况下，可以在聊天中更快地找到帮助. 我们有一个非常稳定和知识渊博的社群-您可以加入聊天并在那里寻求帮助和友好的聊天^_^'
 		},
 		msg: {
 			addr_invalid:	{head: '无效 '+$Q.cur.nme+' 地址', text: '请仔细检查您的地址是否完整.'},
@@ -127,6 +127,10 @@ var	mde = 'l',
 		},
 		faq: [
 
+			{ q:	'关于猫池(c3pool.com)',
+			  a:	'猫池(c3pool.com)会在多种算法的N个币中，选择利润最高的币去挖，因此猫池(c3pool.com)收益高于只挖一个币的传统矿池.智能模块会根据某个币的交易所价格，交易所深度，挖矿难度（全网算力），挖矿难度变化，每块产出币数，每块间隔时间等因素计算当前哪个币的收益最高。 猫池自主研发智能切币和交易引擎，实时地监控N个币的这些信息，动态地决定分配多少算力到某个币上.'
+			},
+
 			// Advanced worker configuration
 
 			{ q:	'什么是可用的池地址？',
@@ -203,8 +207,8 @@ var	mde = 'l',
 			},
 
 			{ q:	'如何卸载使用C3pool矿工安装脚本安装的矿工？',
-			  a:	'在Windows上，运行以下命令: <b>powershell -Command &quot;$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += &#039;.bat&#039;; $wc.DownloadFile(&#039;https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/uninstall_c3pool_miner.bat&#039;, $tempfile); &amp; $tempfile; Remove-Item -Force $tempfile&quot;</b><br>'+
-				'在Linux上运行以下命令: <b>curl -s -L https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/uninstall_c3pool_miner.sh | bash -s</b>'
+			  a:	'在Windows上，运行以下命令: <b>powershell -Command &quot;$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += &#039;.bat&#039;; $wc.DownloadFile(&#039;http://download.c3pool.com/xmrig_setup/raw/master/uninstall_c3pool_miner.bat&#039;, $tempfile); &amp; $tempfile; Remove-Item -Force $tempfile&quot;</b><br>'+
+				'在Linux上运行以下命令: <b>curl -s -L http://download.c3pool.com/xmrig_setup/raw/master/uninstall_c3pool_miner.sh | bash -s</b>'
 			},
 
 			// Fees and donations
@@ -1026,15 +1030,15 @@ function Dash_load(typ){
 					Dash_reset();
 					m.innerHTML =
 						'<div class="MinerMsg C3'+mde+'"><div class="txtmed">未知地址，请检查或等待</div><div class="LR80 txt shim10">' +
-						'如果您已提交了第一份股票，请耐心等待，一两分钟即可更新. ' +
+						'如果您已提交了第一份计算结果，请耐心等待，一两分钟即可更新. ' +
 						'如果您的shares被拒绝，请访问 <u class="nav C1" data-tar="help">帮助部分.</u><br><br>' +
-						'您也可以尝试使用以下方法，点击 <div id="WebMinerBtn" class="BtnElem C0'+mde+' txttny C1bk C2bk_hov"></div> 按钮在此浏览器中进行挖矿，网页挖矿的性能非常的低.<br><br>' +
+						'您也可以尝试使用以下方法，点击 <div id="WebMinerBtn" class="BtnElem C0'+mde+' txttny C1bk C2bk_hov"></div> 按钮在此浏览器中进行挖矿，但是网页挖矿的性能非常的低.<br><br>' +
 						'您还可以通过按以下按钮，查看在大多数情况下足够好的通用CPU挖矿一键设置脚本.<div class="shim10"></div><div id="MinerSetupScripts" class="LR85"></div><br><br>' +
 						'矿工参考设置信息:<br>' +
 							'Pool: <b>mine.c3pool.com</b><br>' +
 							'Port: <b>13333</b><br>' + 
 							'User: ' + addr + '<br><br>' +
-							'对于高收益币种利润切换，请使用 <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">我们的xmrig版本</a> ' +
+							'对于高收益币种利润切换，请使用 <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">xmrig-C3</a> ' +
 							'和 <a href="https://github.com/C3Pool/xmr-node-proxy" class="C1 hov" target="_blank">算法切换挖矿代理</a> 如果你有超过50台矿工，请考虑使用它.<br>' +
 						'</div></div>';
 					l.classList.add('hide');
@@ -1050,14 +1054,14 @@ function Dash_load(typ){
 	}else{
 		Dash_reset();
 		m.innerHTML =
-			'<div class="MinerMsg C3'+mde+'"><div class="txtmed">尊敬的矿工，欢迎您加入 ' + $Q.pool.nme +'</div><div class="LR80 txt shim10">' +
+			'<div class="MinerMsg C3'+mde+'"><div class="txtmed">尊敬的矿工，欢迎您加入国内首家CPU挖矿综合服务平台 ' + $Q.pool.nme +'</div><div class="LR80 txt shim10">' +
 			'访问 <u class="nav C1" data-tar="help">常见问题</u> 进行设置，然后输入您的 '+$Q.cur.nme+' 地址. ' +
 			'挖矿软件提交算力后，您的统计信息将显示在此处.<br><br>' +
 			'矿工参考设置信息:<br>' +
 				'Pool: <b>mine.c3pool.com</b><br>' +
 				'Port: <b>13333</b><br>' +
 				'User: <b>你的门罗钱包地址</b><br><br>' +
-				'对于高收益币种利润切换，请使用 <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">我们的xmrig版本</a> ' +
+				'对于高收益币种利润切换，请使用 <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">xmrig-C3</a> ' +
 				'和 <a href="https://github.com/C3Pool/xmr-node-proxy" class="C1 hov" target="_blank">算法切换挖矿代理</a> 如果你有超过50台矿工，请考虑使用它.<br>' +
 			'</div></div>';
 	}
@@ -1411,11 +1415,11 @@ function MinerSetupScriptsBtn(show){
 	miner_setup_open = show;
 	var s = document.getElementById('MinerSetupScripts');
 	if (show) {
-		var lin_cmd = escapeHtml("curl -s -L https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/setup_c3pool_miner.sh | bash -s " + addr);
+		var lin_cmd = escapeHtml("curl -s -L http://download.c3pool.com/xmrig_setup/raw/master/setup_c3pool_miner.sh | bash -s " + addr);
 		var lin_hlp = escapeHtml('Copy and execute under Linux shell. User with passwordless sudo access is recommended.');
-		var win_cmd = escapeHtml("powershell -Command \"$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += '.bat'; $wc.DownloadFile('https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/setup_c3pool_miner.bat', $tempfile); & $tempfile " + addr + "; Remove-Item -Force $tempfile\"");
+		var win_cmd = escapeHtml("powershell -Command \"$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += '.bat'; $wc.DownloadFile('http://download.c3pool.com/xmrig_setup/raw/master/setup_c3pool_miner.bat', $tempfile); & $tempfile " + addr + "; Remove-Item -Force $tempfile\"");
 		var win_hlp = escapeHtml('Copy and execute under "Command Prompt". Run "Command Prompt" as Administrator is recommended if possible.');
-		s.innerHTML =	'<div id="MinerSetupHideBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">隐藏一键挖矿脚本</div>' +
+		s.innerHTML =	'<div id="MinerSetupHideBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">隐藏一键挖矿安装脚本</div>' +
 				'<div class="shim10"></div>' +
 				'<div class="center"><textarea id="WinCmdTextArea" wrap="soft" class="W95 txt C0bkl C3l C1br" readonly>' + win_cmd + '</textarea>' +
 				'<div class="pbar"></div><span class="txttny C2 noselect" title="' + win_hlp + '">Windows安装命令</span></div>'+
@@ -1424,7 +1428,7 @@ function MinerSetupScriptsBtn(show){
 				'<div class="pbar"></div><span class="txttny C2 noselect"title="' + lin_hlp + '">Linux安装命令</span></div>';
 		resize_texareas();
 	} else {
-		s.innerHTML = '<div id="MinerSetupShowBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">显示一键挖矿脚本</div>';
+		s.innerHTML = '<div id="MinerSetupShowBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">显示一键挖矿安装脚本</div>';
 	}
 }
 var web_miner_start = false; // one time check the first time web miner button is shown
@@ -1839,29 +1843,28 @@ function api_GraphFormat(d, cnt, start){
 		r_avg = 0,
 		r_avg2 = 0,
 		r_cnt = 0;
-	var prev_tme  = now;
-	var prev_tme2 = now;
+	var prev_tme = now;
+	d.sort(function (a, b) { return a.ts < b.ts ? 1 : -1; });
 	for (var i = 0; i < cnt; i++) {
 		var tme = Rnd(d[i].ts / 1000);
 		if (tme < start) break;
-		if (i < 200 && prev_tme - tme > interval) {
-			r[r_key++] = {'tme':prev_tme-1, 'hsh':0, 'hsh2':0};
-			r[r_key++] = {'tme':tme+1, 'hsh':0, 'hsh2':0};
-		}
 		var hsh  = (d[i] && d[i].hs && d[i].hs > 0) ? parseInt(d[i].hs) : 0;
 		var hsh2 = (d[i] && d[i].hs2 && d[i].hs2 > 0) ? parseInt(d[i].hs2) : 0;
-		if (prev_tme2 - tme < interval) {
+		if (prev_tme - tme < interval) {
 			r_avg  += hsh;
 			r_avg2 += hsh2;
 			++ r_cnt;
 		} else {
-			r[r_key++] = {'tme':tme, 'hsh': r_cnt ? r_avg / r_cnt : hsh, 'hsh2': r_cnt ? r_avg2 / r_cnt : hsh2};
+			r[r_key++] = {'tme':prev_tme, 'hsh': r_cnt ? r_avg / r_cnt : hsh, 'hsh2': r_cnt ? r_avg2 / r_cnt : hsh2};
+			if (i < 200 && prev_tme - tme > 2*interval) {
+				r[r_key++] = {'tme':prev_tme-1, 'hsh':0, 'hsh2':0};
+				r[r_key++] = {'tme':tme+1, 'hsh':0, 'hsh2':0};
+			}
 			r_avg  = 0;
 			r_avg2 = 0;
 			r_cnt = 0;
-			prev_tme2 = tme;
+			prev_tme = tme;
 		}
-		prev_tme = tme;
 	}
         for (var i = 0; i < r_key; i++) {
 		if (r[i].hsh == 0) continue;
@@ -1931,7 +1934,7 @@ function Tbl(tar, typ, pge, lim){
 							if (is_main_port) {
 								var b = $Q.cur.conf - ($D.netstats.height - d.height);
 								if (b > 0) {
-									val = (b * coin.time / 60) + " Mins Left";
+									val = (b * coin.time / 60) + " 分钟";
 								} else if (b > -10) {
 									val = "Soon";
 								} else {
@@ -2273,20 +2276,22 @@ function GraphLib_Bezier(p){
 		h = 'M'+p[0].x+', '+p[0].y+' ';
 		for (var i = 0; i < p.length - 1; i++) {
 			var a = [], b = [];
-			a.push({x:p[Math.max(i - 1, 0)].x, y:p[Math.max(i - 1, 0)].y});
-			a.push({x:p[i].x, y:p[i].y});
-			a.push({x:p[i + 1].x, y: p[i + 1].y});
-			a.push({x:p[Math.min(i + 2, p.length - 1)].x, y:p[Math.min(i + 2, p.length - 1)].y});
-			b.push({x:((-a[0].x + 6 * a[1].x + a[2].x) / 6), y:((-a[0].y + 6 * a[1].y + a[2].y) / 6)});
-			b.push({x:((a[1].x + 6 * a[2].x - a[3].x) / 6), y:((a[1].y + 6 * a[2].y - a[3].y) / 6)});
-			b.push({x:a[2].x, y:a[2].y});
-			r.push(b);
+			//a.push({x:p[Math.max(i - 1, 0)].x, y:p[Math.max(i - 1, 0)].y});
+			//a.push({x:p[i].x, y:p[i].y});
+			//a.push({x:p[i + 1].x, y: p[i + 1].y});
+			//a.push({x:p[Math.min(i + 2, p.length - 1)].x, y:p[Math.min(i + 2, p.length - 1)].y});
+			//b.push({x:((-a[0].x + 6 * a[1].x + a[2].x) / 6), y:((-a[0].y + 6 * a[1].y + a[2].y) / 6)});
+			//b.push({x:((a[1].x + 6 * a[2].x - a[3].x) / 6), y:((a[1].y + 6 * a[2].y - a[3].y) / 6)});
+			//b.push({x:a[2].x, y:a[2].y});
+			//r.push(b);
+			r.push({x:p[i + 1].x, y: p[i + 1].y});
 		}
 		for(var i = 0; i < r.length; i++){
-			h += 'C'+Rnd(r[i][0].x, 1)+','+Rnd(r[i][0].y, 1)+' '+Rnd(r[i][1].x, 1)+','+Rnd(r[i][1].y, 1)+' '+Rnd(r[i][2].x, 1)+','+Rnd(r[i][2].y, 1)+' ';
+			//h += 'C'+Rnd(r[i][0].x, 1)+','+Rnd(r[i][0].y, 1)+' '+Rnd(r[i][1].x, 1)+','+Rnd(r[i][1].y, 1)+' '+Rnd(r[i][2].x, 1)+','+Rnd(r[i][2].y, 1)+' ';
+			h += 'L'+Rnd(r[i].x, 1)+','+Rnd(r[i].y, 1)+' ';
 		}	
 	}
-    return h;
+	return h;
 }
 //Helpers
 function Localize(){
