@@ -284,6 +284,13 @@ var COINS = {
 		unit: "G",
 		factor: 16,
 	},
+	9231: {
+		name: "XEQ",
+		algo_class: "cn/gpu",
+		divisor: 10000,
+		url: "https://explorer.equilibria.network",
+		time: 120,
+	},
 	19950: {
 		name: "XWP",
 		divisor: 1000000000000,
@@ -358,6 +365,13 @@ var COINS = {
 		name: "ARQ",
 		divisor: 1000000000,
 		url: "https://explorer.arqma.com",
+		time: 120,
+	},
+	16000: {
+		name: "CCX",
+		algo_class: "cn/ccx",
+		divisor: 1000000,
+		url: "https://explorer.conceal.network",
 		time: 120,
 	},
 };
