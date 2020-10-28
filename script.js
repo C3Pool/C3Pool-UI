@@ -10,7 +10,7 @@ var	mde = 'l',
 			'back-d':	'313131'	   								//C0 - dark
 		},
 		cur: {
-			nme:	'XMR钱包',						
+			nme:	'Monero',						
 			sym:	'XMR',
 			conf:	30,	// blocks needed to mature
 			port:	18081,
@@ -22,12 +22,13 @@ var	mde = 'l',
 		news:		true,												//enable news (motd) alerts on homepage
 		email:		true,												//enable email notifications
 		timer:		60,												//refresh timer in seconds
+		pending_days:	30,												//time in days pending will reach 0
 		graph: {
 			hrs:	72,												//max chart length in hours
 			pplns:	false,												//show pplns window on chart
 		},
 		pay: {
-			min_auto:	0.005,											//minimum for automatic threshold
+			min_auto:	0.003,											//minimum for automatic threshold
 			def_auto:	0.005,											//minimum for automatic threshold
 			max_fee:	0.0004,											//max fee (for min_auto)
 			zero_fee_pay:	4,											//theshold that makes fee to be zero
@@ -36,189 +37,241 @@ var	mde = 'l',
 	},
 	$$ = {
 		calc:	{
-			'1':	'一天',
-			'7':	'一周',
-			'30':	'一月',
-			'365':	'一年',
+			'1':	'Per Day',
+			'7':	'Per Week',
+			'30':	'Per Month',
+			'365':	'Per Year',
 		},
 		page_sizes: [15, 50, 100],
 		hlp:	{
-			head:	'尊敬的矿工，欢迎您加入国内首家CPU挖矿综合服务平台 ' + $Q.pool.nme,
-			text:	'入门很容易，并且我们有一个庞大而友好的社群，乐意为您提供帮助. 您可以加入 <a href="https://jq.qq.com/?_wv=1027&k=p11J9gBD" class="C1 hov">QQ社群</a>, <a href="https://t.me/C3pool_CN" class="C1 hov">Telegram</a> 和 <a href="mailto:support@c3pool.com" class="C1 hov">support@c3pool.com</a>. 加入后请耐心等待，有人会回复您. 大多数情况下，可以在聊天中更快地找到帮助. 我们有一个非常稳定和知识渊博的社群-您可以加入聊天并在那里寻求帮助和友好的聊天^_^'
+			head:	'Welcome to ' + $Q.pool.nme,
+			text:	'Getting started is easy and this pool has a large and friendly community that are happy to help you. The pool operator can be reached in the <a href="https://discord.gg/ZdrUCRC" class="C1 hov">Discord</a>, <a href="https://twitter.com/c3pool_support" class="C1 hov">Twitter</a> or at <a href="mailto:c3pool@outlook.com" class="C1 hov">c3pool@outlook.com</a>. Please be patient and someone will get back to you. Most of the time help can be found quicker in the chat. The pool has a quite stable and knowlegable community - you can join the chat and seek help and a friendly chat there :)'
 		},
 		msg: {
-			addr_invalid:	{head: '无效 '+$Q.cur.nme+' 地址', text: '请仔细检查您的地址是否完整.'},
-			addr_nodata:	{head: '无数据', text: ''}
+			addr_invalid:	{head: 'Invalid '+$Q.cur.nme+' Address', text: 'Double check that your address is complete.'},
+			addr_nodata:	{head: 'No Data', text: ''}
 		},
 		nav:{
-			home:		'首页',
-			coins:		'币种',
-			blocks:		'区块',
-			payments:	'支付',
-			help:		'帮助'
+			home:		'Home',
+			coins:		'Coins',
+			blocks:		'Blocks',
+			payments:	'Payments',
+			help:		'Help'
 		},
 		pay:{
-			DashPending:	{lbl: '<span id="PendingPay"></span> ' + $Q.cur.sym + ' Pending', var: 'due', tooltip: '等待支付金额'},
-			DashPaid:	{lbl: $Q.cur.sym + ' Paid', var: 'paid', tooltip: '已支付金额'}
+			DashPending:	{lbl: '<span id="PendingPay"></span> ' + $Q.cur.sym + ' Pending', var: 'due', tooltip: 'Total due pool owes you'},
+			DashPaid:	{lbl: $Q.cur.sym + ' Paid', var: 'paid', tooltip: 'Amount pool already paid to you'}
 		},
 		wm:{
-			on:  '网页挖矿: <span id="WebMinerHash">--</span>',
-			off: '启动网页挖矿',
+			on:  'Web mining: <span id="WebMinerHash">--</span>',
+			off: 'Run Web Miner',
 		},
 		sts: function() { return {
 			MinerWorkerCount:	'<div id="WebMinerBtn" class="BtnElem C0'+mde+' txttny C1bk C2bk_hov"></div>',
-			MinerHashes:		'你的 <select id="HashSelect"></select> 算力',
-			MinerShares:		'总提交哈希 (Hashes: <span id="TotalHashes">--</span>)',
+			MinerHashes:		'Your <select id="HashSelect"></select> Hashrate',
+			MinerShares:		'Shares (Hashes: <span id="TotalHashes">--</span>)',
 			MinerCalc: 		'<input type="text" id="MinerCalcHsh" size="3" /><select id="MinerCalcUnit"></select><select id="MinerCalcFld"></select>',
 		}},
 		stsw: function() { return { // For worker
-			MinerHashes: 		'总哈希',
-			MinerShares: 		'有效 / 无效 份额',
+			MinerHashes: 		'Total Hashes',
+			MinerShares: 		'Valid / Invalid Shares',
 		}},
 		tbl: {
 			coins: [
-				{name: 'name', lbl: '币种名称', cls: 'min'},
-				{name: 'algo', lbl: '币种算法', cls: 'min'},
-				{name: 'profit', lbl: '收益率', 'tooltip':'每个哈希的利润百分比', cls: 'min'},
-				{name: 'eff', lbl: 'Effort', 'tooltip':'当前提交Hah百分比', cls: 'min'},
-				{name: 'reward_perc', lbl: '奖励', 'tooltip':'区块奖励百分比', cls: 'min'},
-				{name: 'accounts', lbl: '矿工', 'tooltip':'矿工数量(按钱包地址统计)', cls: 'min'},
-				{name: 'poolhashrate', lbl: '算力', 'tooltip':'矿池算力', cls: 'min'},
-				{name: 'worldhashrate', lbl: '全网算力', 'tooltip':'全网算力', cls: 'min'},
-				{name: 'height', lbl: '区块高度', cls: 'min'},
-				{name: 'pplns', lbl: 'PPLNS', 'tooltip':'算力分配百分比', cls: 'min'},
-				{name: 'notes', lbl: '状态', cls: 'trunc'},
+				{name: 'name', lbl: 'Name', cls: 'min'},
+				{name: 'algo', lbl: 'Algo', cls: 'min'},
+				{name: 'profit', lbl: 'Profit', 'tooltip':'Profit per hash in percent', cls: 'min'},
+				{name: 'eff', lbl: 'Effort', 'tooltip':'Current block effort in percent', cls: 'min'},
+				{name: 'reward_perc', lbl: 'Reward', 'tooltip':'Block reward in percent', cls: 'min'},
+				{name: 'accounts', lbl: 'Accounts', 'tooltip':'Account (Wallet) Count', cls: 'min'},
+				{name: 'poolhashrate', lbl: 'Hashrate', 'tooltip':'Pool hashrate', cls: 'min'},
+				{name: 'worldhashrate', lbl: 'World Hash', 'tooltip':'Coin world hashrate', cls: 'min'},
+				{name: 'height', lbl: 'Top Height', cls: 'min'},
+				{name: 'pplns', lbl: 'PPLNS', 'tooltip':'Share in last block PPLNS window in percent', cls: 'min'},
+				{name: 'notes', lbl: 'Notes', cls: 'trunc'},
 			],
 			blocks: [
 				{name: 'num', lbl: '#', cls: 'min'},
-				{name: 'tme', lbl: '时间', cls: 'min'},
-				{name: 'coin', lbl: '币种', cls: 'min'},
-				{name: 'eff', lbl: '幸运度', cls: 'min'},
-				{name: 'reward', lbl: '区块奖励', 'tooltip':'以原始币种为单位的原始区块奖励', cls: 'min'},
-				{name: 'payment', lbl: '支付 ('+$Q.cur.sym+')', cls: 'min'},
-				{name: 'bheight', lbl: '区块高度', cls: 'min'},
+				{name: 'tme', lbl: 'Found', cls: 'min'},
+				{name: 'coin', lbl: 'Coin', cls: 'min'},
+				{name: 'eff', lbl: 'Effort', cls: 'min'},
+				{name: 'reward', lbl: 'Raw reward', 'tooltip':'Raw block reward in native coin units', cls: 'min'},
+				{name: 'payment', lbl: 'Payment ('+$Q.cur.sym+')', cls: 'min'},
+				{name: 'bheight', lbl: 'Height', cls: 'min'},
 				{name: 'hash', lbl: 'Hash', typ: 'block', cls: 'trunc'},
 			],
 			poolpay: [
-				{name: 'tme', lbl: '支付时间', cls: 'min'},
-				{name: 'payees', lbl: '支付人数', cls: 'min'},
-				{name: 'amnt', lbl: '金额 ('+$Q.cur.sym+')', cls: 'min'},
-				{name: 'fee', lbl: '网络转账费 ('+$Q.cur.sym+')', cls: 'min'},
+				{name: 'tme', lbl: 'Payment Sent', cls: 'min'},
+				{name: 'payees', lbl: 'Payees', cls: 'min'},
+				{name: 'amnt', lbl: 'Amount ('+$Q.cur.sym+')', cls: 'min'},
+				{name: 'fee', lbl: 'Fee ('+$Q.cur.sym+')', cls: 'min'},
 				{name: 'hash', lbl: 'Tx Hash', typ: 'tx', cls: 'trunc'},
 			],
 			pay: [
-				{name: 'tme', lbl: '支付时间', cls: 'min'},
-				{name: 'amnt', lbl: '金额 ('+$Q.cur.sym+')', cls: 'min'},
+				{name: 'tme', lbl: 'Payment Sent', cls: 'min'},
+				{name: 'amnt', lbl: 'Amount ('+$Q.cur.sym+')', cls: 'min'},
 				{name: 'hash', lbl: 'Tx Hash', typ: 'tx', cls: 'trunc'},
 			]
 		},
 		trn:{
-			avgeff:		'当前运气',
-			conf:		'已确认',
-			eff:		'运气',
-			eml_on:		'邮件警报开启',
-			eml_off:	'邮件警报关闭',
-			min:		'最低要求',
-			que:		'付款已进入队列',
-			rcnt:		'最近',
-			set:		'更新限额',
-			updt:		'限额已更新',
-			vwpy:		'显示支付历史'
+			avgeff:		'Avg Effort',
+			conf:		'Confirmed',
+			eff:		'Effort',
+			eml_on:		'Email Alerts On',
+			eml_off:	'Email Alerts Off',
+			min:		'Minimum',
+			que:		'Payment Queued',
+			rcnt:		'Recent',
+			set:		'Update threshold',
+			updt:		'Threshold updated',
+			vwpy:		'Show Your Payments'
 		},
 		faq: [
 
-			{ q:	'关于猫池(c3pool.com)',
-			  a:	'猫池(c3pool.com)会在多种算法的N个币中，选择利润最高的币去挖，因此猫池(c3pool.com)收益高于只挖一个币的传统矿池.智能模块会根据某个币的交易所价格，交易所深度，挖矿难度（全网算力），挖矿难度变化，每块产出币数，每块间隔时间等因素计算当前哪个币的收益最高。 猫池自主研发智能切币和交易引擎，实时地监控N个币的这些信息，动态地决定分配多少算力到某个币上.'
-			},
-
 			// Advanced worker configuration
 
-			{ q:	'什么是可用的池地址？',
-			  a:	'我们建议使用 <b>mine.c3pool.com</b> 作为主要的挖矿地址，因为它会将您定向到最近的节点，并以最低的延迟. 您还可以用其它矿池节点服务器:'+
+			{ q:	'What are available pool addresses?',
+			  a:	'We recommend using <b>mine.c3pool.com</b> as primary mining address because it will direct you to the closest alive pool server with the lowest latency. Other pool node servers you can use as backup:'+
 				'<ul>'+
-					'<li><b>asia.c3pool.com</b>: 亚洲地区</li>'+
-					'<li><b>us.c3pool.com</b>: 美国地区</li>'+
+					'<li><b>asia.c3pool.com</b>: ASIA</li>'+
+					'<li><b>us.c3pool.com</b>: USA</li>'+
 				'</ul>'
 			},
 
-			{ q:	'有哪些可用的矿池端口？',
-			  a:	'矿池支持许多端口，这些端口仅在启动时有所不同. 请根据您的矿工算力选择它们:'+
+			{ q:	'What are available pool ports?',
+			  a:	'Pool support many ports that are only different by their starting difficulty. Please select them based on your miner speed:'+
 				'<ul>'+
 					'<li><b>80</b>: 1000 diff (Firewall bypass)</li>'+
 					'<li><b>443</b>: 1000 diff (Firewall bypass)</li>'+
-					'<li><b>13333</b>: 25000 diff (动态难度)</li>'+
-					'<li><b>14444</b>: 25000 diff (动态难度)</li>'+
-					'<li><b>15555</b>: 50000 diff (动态难度)</li>'+
-					'<li><b>17777</b>: 50000 diff (动态难度)</li>'+
-					'<li><b>19999</b>: 100000 diff (动态难度)</li>'+
+					'<li><b>13333</b>: 25000 diff (auto-adjust)</li>'+
+					'<li><b>14444</b>: 25000 diff (auto-adjust)</li>'+
+					'<li><b>15555</b>: 50000 diff (auto-adjust)</li>'+
+					'<li><b>17777</b>: 50000 diff (auto-adjust)</li>'+
+					'<li><b>19999</b>: 100000 diff (auto-adjust)</li>'+
 					'<li><b>23333</b>: 1000000 diff (Proxy/NiceHash)</li>'+
 					'<li><b>33333</b>: 15000 diff (SSL)</li>'+
 				'</ul>'
 			},
+/*
+			{ q:	'Can I mine here using Tor .onion address?',
+			  a:	'Yes. You can mine on MoneroOcean pool using <b>mo2tor2amawhphlrgyaqlrqx7o27jaj7yldnx3t6jip3ow4bujlwz6id.onion</b> Tor address (and usual <b>10001</b>-<b>18192</b> http ports).'
+			},
+*/
 
-			// Pool  
+			// Pool UI 
 
-			{ q:	'什么时候支付？',
-			  a:	'当您的待支付余额达到付款最低限额时，将自动进行付款. 默认情况下，付款最低限额为 <b>0.005</b> XMR，但您可以在主页矿工选项中将其提高.'
+			{ q:	'When payments happen?',
+			  a:	'Payments happen automatically in couple of hours when your total due reaches your payment threshold. By default payment threshold is <b>0.3</b> XMR but your can lower it in home page miner options.'
 			},
 
-			{ q:	'Raw hashrate是什么意思？',
-			  a:	'<b>Raw hashrate</b> 是您的矿工在其开采不同算法时产生的算力. <b>Pay hashrate</b> 是用于确定您将获得多少付款的算力（其<b>Raw hashrate</ b>乘以硬币页面的利润因子）.'
+			{ q:	'What does raw hashrate means?',
+			  a:	'<b>Raw hashrate</b> is hashrate your miner produces on algo it mines. <b>Pay hashrate</b> is hashrate that is used to determine how much you will be payed (it is <b>raw hashrate</b> multiplied by profit factors from the coins page).'
 			},
 
-			{ q:	'如何设置或更新您的电子邮件以进行通知？',
-			  a:	'转到主页矿工选项，将您的新电子邮件放入<b>将电子邮件更改为</ b>字段，然后按<b>开/关电子邮件警报</ b>按钮. 如果您先前已设置电子邮件，则必须正确填写<b>更改电子邮件自</ b>字段. 如果您忘记了以前的电子邮件，请联系提我们并供您的XMR钱包地址，以便我们可以重置您的电子邮件地址.'
+			{ q:	'How set or update your email for notifications?',
+			  a:	'Go to home page miner options, put your new email into <b>Change email TO</b> field and press <b>Email alerts On/Off</b> button. You must correctly fill <b>Change email FROM</b> field if you have email previously set. If you can not remember your previous email please contact pool operator providing your XMR wallet address so he can reset your email address.'
 			},
 
-			{ q:	'是否可以在特定的XMR地址上打开池主页？',
-			  a:	'是的，你可以使用 <b>https://c3pool.com/#/dashboard?addr=&quot;xmr_address&quot;</b> 此链接. 此外，您可以使用该地址立即开始网页挖矿，而无需单击按钮: <b>https://c3pool.com/#/dashboard?addr=&quot;xmr_address&quot;&amp;web_miner</b>.'
+			{ q:	'Is it possible to open pool home page on specific XMR address?',
+			  a:	'Yes. You can use <b>https://c3pool.com/#/dashboard?addr=&quot;xmr_address&quot;</b> link for that. Moreover you can use this address to start web mining immediately without need to click the button: <b>https://c3pool.com/#/dashboard?addr=&quot;xmr_address&quot;&amp;web_miner</b>.'
 			},
 
-			// Algo 
+			// Algo switching
 
-			{ q:	'矿池如何确定我的矿工挖哪个算法利润最高？',
-			  a:	'在第一次接入矿池的时候，您的矿工将报告矿池可支持的所有算法的算力. 并使用该数据为您的矿工提供最佳利润的币，该利润取决于矿工的算力与当前币哈希利润的乘积.'
+			{ q:	'How pool determines the most profitable coin to mine for my algo switching miner?',
+			  a:	'During login your algo switching miner will report hashrates it can do for all algorithms it support. Pool use that data to offer your miner a coin with the best profit that is determined by multiplication of hashrate of your miner and current coin hash profit.'
 			},
 
-			{ q:	'我可以使用不支持算法切换的挖矿软件来挖掘这里支持的币吗？',
-			  a:	'当然可以. 您只需要在矿工名后面加上 <b>~</b> , 像这样: <b>x~k12</b>. 支持的算法列表可以在以下位置找到 <u class="nav C1" data-tar="coins">币种列表</u>.'
+			{ q:	'Can I mine coins supported here using miner that does not support algo switching?',
+			  a:	'Yes. You can do that if you add name of your coin algorithm at the end of miner password field after <b>~</b> character, like this: <b>worker_name~k12</b>. The list of supported algorithms can be found at <u class="nav C1" data-tar="coins">coins page</u>.'
 			},
 
-			{ q:	'我需要在这里拥有山寨币钱包吗？',
-			  a:	'不需要.只需要门罗币钱包，因为矿池使用门罗币（XMR）进行所有付款.'
+			{ q:	'Do I need to have altcoin wallets to mine them here?',
+			  a:	'No. Only Monero wallet is needed because pool does all payments in Monero (XMR).'
 			},
 
-			{ q:	'我是否只为我的挖的币区块付费？',
-			  a:	'不会.矿池会像以前一样从您发现的每个区块中支付您的份额. 像以前一样，您的报酬份额基于您在找到区块时在PPLNS窗口中提交的哈希值. 特别注意的是，这意味着即使您停止了挖矿，只要您的股份在PPLNS窗口之内，您的收入也将得到支付.'
+			{ q:	'Am I payed only for the coin blocks I mine?',
+			  a:	'No. Pool pays you your share from every block we find as before. Your pay share like before is based on amount of hashes you submitted in the PPLNS window on the moment block is found. In particulair that means that your are payed even after you stopped mining as long as your shares are within PPLNS window.'
 			},
-
+/*
+			{ q:	'How can I verify my PPLNS reward for a particular XMR block?',
+			  a:	'For each XMR block for the last month pool stores CSV file with shares used to determine block rewards to all miners on the pool. You can access this file using link from XMR height value or from <b>https://block-share-dumps.moneroocean.stream/&quot;block hash&quot;.cvs.xz</b> location directly. Each line of this file corresponds to submitted share and has the following fields:'+
+				'<ul>'+
+					'<li><b>part_of_xmr_address</b> - last 16 characters of your XMR address used on the pool</li>'+
+					'<li><b>timestamp</b>: Linux timestamp in hex format</li>'+
+					'<li><b>raw_diff</b>: difficulty of this share</li>'+
+					'<li><b>count</b>: number of shares merged into this one (with cumulative raw_diff)</li>'+
+					'<li><b>coin</b>: name of the coin</li>'+
+					'<li><b>xmr_diff</b>: diff normalized to XMR profits using current profit factor for that coin</li>'+
+					'<li><b>xmr_diff_payed</b>: can be omitted if equal to xmr_diff</li>'+
+				'</ul>'+
+				'You can also use calc_mo_cvs.js script to parse this file like this on Linux:<br>'+
+					'<b>wget https://raw.githubusercontent.com/MoneroOcean/nodejs-pool/master/block_share_dumps/calc_mo_cvs.js<br>'+
+					'wget -O - https://block-share-dumps.moneroocean.stream/4900622681b754d56d5c93e1e4d010f6fc2097e2f2c1a0809e30b09b13f12472.cvs.xz | unxz -c | node calc_mo_cvs.js 89TxfrUmqJJcb1V124WsUzA78Xa3UYHt7Bg8RGMhXVeZYPN8cE5CZEk58Y1m23ZMLHN7wYeJ9da5n5MXharEjrm41hSnWHL<br>'+
+					'<br>'+
+					'PPLNS window size:             3.76 hours<br>'+
+					'PPLNS window size:             215549020500 xmr hashes<br>'+
+					'Pool XMR normalized hashrate:  15.94 MH/s<br>'+
+					'<br>'+
+					'Your submitted shares:         33578<br>'+
+					'Your payment:                  0.346985% (747923823 xmr hashes)<br>'+
+					'Your XMR normalized hashrate:  55.32 KH/s<br>'+
+					'<br>'+
+					'You mined these coins:<br>'+
+					' LOKI: 244825043 raw coin hashes (37.478417% of XMR normalized hashrate)<br>'+
+					' MSR: 1809000 raw coin hashes (0.182182% of XMR normalized hashrate)<br>'+
+					' TUBE: 295000 raw coin hashes (0.095110% of XMR normalized hashrate)<br>'+
+					' XHV: 359000 raw coin hashes (0.119957% of XMR normalized hashrate)<br>'+
+					' XMR: 464642699 raw coin hashes (62.124335% of XMR normalized hashrate)</b>'
+			},
+*/
 			// Solving issues
 
-			{ q:	'如果我的余额少于 <b>' + $Q.pay.min_auto + '</b> XMR，可以支付吗？',
-			  a:	'抱歉，不可以.最低支付金额 <b>' + $Q.pay.min_auto + '</b> XMR 在矿池代码中已经锁死，因此无法解决. 请考虑累计到 <b>' + $Q.pay.min_auto + '</b> XMR 进行支付.'
+			{ q:	'Can I have payment if I have less than <b>' + $Q.pay.min_auto + '</b> XMR?',
+			  a:	'Sorry, no. Minimum payment of <b>' + $Q.pay.min_auto + '</b> XMR is hardcoded in the pool code and it is too much mess to workaround it. Please consider to accumulate <b>' + $Q.pay.min_auto + '</b> XMR to get payment.'
 			},
 
-			{ q:	'是否可以更改我的钱包地址（将待支付款总额从钱包上移到另一个）？',
-			  a:	'一半情况下，不会这样做. 但是，如果有足够的证据表明您要从自己拥有的钱包中转移资金，则可以联系我们审查. 其中包括您知道该钱包的电子邮件地址（如果已设置）; 停止所有旧钱包的挖矿活动至少一周; &hellip; 更多的验证方式，我们暂时不公布.'
+			{ q:	'Is there a way to change my wallet address (move total amount due from on wallet to another)?',
+			  a:	'Generally, no. However it can be reviewed on case by case basis if there is enough evidence that you are asking to move money from wallet you own. That includes you knowing email address for that wallet (if it is set); stopping ALL mining activity for at least one week to your old wallet; &hellip; other checks that we will not disclose now.'
 			},
 
-			{ q:	'为什么Web矿工无法正常工作（总是显示零哈希率）？',
-			  a:	'尝试使用&#039;s 隐身模式或其他浏览器. 也可能是杀毒软件阻止了.'
+			{ q:	'Why my miner recieves pool errors about throttled shares?',
+			  a:	'Because you are connecting too many miners with too low diff. Either increase miner diff or use mining proxy.'
 			},
 
-			{ q:	'如何卸载使用C3pool矿工安装脚本安装的矿工？',
-			  a:	'在Windows上，运行以下命令: <b>powershell -Command &quot;$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += &#039;.bat&#039;; $wc.DownloadFile(&#039;http://download.c3pool.com/xmrig_setup/raw/master/uninstall_c3pool_miner.bat&#039;, $tempfile); &amp; $tempfile; Remove-Item -Force $tempfile&quot;</b><br>'+
-				'在Linux上运行以下命令: <b>curl -s -L http://download.c3pool.com/xmrig_setup/raw/master/uninstall_c3pool_miner.sh | bash -s</b>'
+			{ q:	'What is miner ban policy on this pool?',
+			  a:	'In case of invalid shares pool can use temporary IP based bans that will be automatically removed.<br><br>'+
+				'Permanent XMR address ban can be only issued if we get enough evidence that any wallet address on the pool is used for malware/botnet activities. By enough evidence we mean at least several reports from different sources. And by address ban we mean that workers that try to use this address will be rejected. We do not plan to freeze already mined funds (total due), so they can be retrieved by setting lower payment threshold in home page miner options as usual.'
+			},
+			{ q:	'Why some of my worker names are replaced by <b>all_other_workers</b> worker?',
+			  a:	'This is because you use too many worker names and to avoid DB / network channel overloads all extra miners are joined under <b>all_other_workers</b> worker name.'
+			},
+
+			{ q:	'Why is the web miner not working (always shows zero hashrate)?',
+			  a:	'Try to use your browser&#039;s incognito mode or another browser. Also maybe your are blocked by your malware or antivirus software or by your ISP.'
+			},
+
+			{ q:	'How can I uninstall miner installed using the C3Pool miner setup scripts?',
+			  a:	'On Windows run this command: <b>powershell -Command &quot;$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += &#039;.bat&#039;; $wc.DownloadFile(&#039;https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/uninstall_c3pool_miner.bat&#039;, $tempfile); &amp; $tempfile; Remove-Item -Force $tempfile&quot;</b><br>'+
+				'On Linux run this command: <b>curl -s -L https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/uninstall_c3pool_miner.sh | bash -s</b>'
 			},
 
 			// Fees and donations
 
-			{ q:	'矿池手续费真的是0吗？',
-			  a:	'是的，矿池手续费是0%. 但是请注意，有网络转账手续费（在XMR待支付余额大于 <b> 4.0 </ b>之后也变为零），网络转账手续费是门罗网络收取的，并非我们收取.'
+			{ q:	'Are pool mining fees are really zero?',
+			  a:	'Yes, mining fee is zero. However please note that there is also withdrawal tx fee (that became also zero after <b>4.0</b> XMR). There is also small <b>0.4%</b>-<b>0.6%</b> TradeOgre exchange fee. Also web mining fee is <b>3%</b> (payed to web miner software developer).'
 			},
 
-			{ q:	'您接受加密货币捐赠吗？',
-			  a:	'是. 我们当然接受^_^ 一点点都对我们使用的零费用挖矿政策特别有帮助. 如果出于某种原因您对捐赠一些加密货币已表示支持，那么这里是您可以使用的地址:'+
+			{ q:	'Can I split/donate hashrate of my worker between several Monero addresses?',
+			  a:	'Yes. In your miner config add <b>%percent2%xmr_wallet_address2</b> after your <b>xmr_wallet_address1</b> address and pool will split <b>percent2</b> percent of your hashrate to <b>xmr_wallet_address2</b>. For example if you want to donate <b>0.1%</b> of your hashrate to support Monero developers then just add <b>%0.1%44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A</b> after your Monero wallet address. This split happens on per worker basis, so one of your workers can has split enabled and other can work without split.'
+			},
+/*
+			{ q:	'Is this pool software open source?',
+			  a:	'Yes. It is powered by software in <a href="https://github.com/MoneroOcean/nodejs-pool" target="_blank" class="C3l hov">nodejs-pool</a> and <a href="https://github.com/MoneroOcean/moneroocean-gui" target="_blank" class="C3l hov">moneroocean-gui</a> repositories.'
+			},
+*/
+			{ q:	'Are you accepting cryptocurrency donations? What are pool wallet view keys?',
+			  a:	'Yes. Why not =) Every bit helps especially with zero fee mining policy we use. If for some reason you feel grateful to a degree to donate some crypto then here are addresses you can use for that. These wallets are also used by the pool to recieve block rewards, so you can double check we not skimming any blocks by using wallet view keys listed below:'+
 				'<ul>'+
 					'<li><b>XMR</b>: 43987ATFjfFXp9yBojQoifVPK4CerTF7Zaoo4eDY2p6AEp5uewT3PsY7hYHEHvbRivKcexmSaDdXscnnNtveV56pJpCa9uV<br>'+
 					'<li><b>BTC</b>: 3Q4QT5WKMzCh4WqsGF2nKxc8XoLuLLuMqk</li>'+
@@ -286,7 +339,6 @@ var COINS = {
 	},
 	9231: {
 		name: "XEQ",
-		algo_class: "cn/gpu",
 		divisor: 10000,
 		url: "https://explorer.equilibria.network",
 		time: 120,
@@ -321,24 +373,22 @@ var COINS = {
 		name: "XTA",
 		divisor: 1000000000000,
 		url: "https://explorer.italo.network",
-		time: 120,
+		time: 15,
+		unit: "G",
+		factor: 48,
 	},
-	24182: {
+	25182: {
 		name: "TUBE",
-		divisor: 100000000,
-		url: "https://explorer.ipbc.io",
-		time: 120,
+		divisor: 1000000000,
+		url: "https://explorer.bittube.cash",
+		time: 15,
+		unit: "G",
+		factor: 40,
 	},
-	20189: {
+	11812: {
 		name: "XLA",
 		divisor: 100,
 		url: "https://explorer.scalaproject.io",
-		time: 300,
-	},
-	22023: {
-		name: "LOKI",
-		divisor: 1000000000,
-		url: "https://lokiblocks.com",
 		time: 120,
 	},
 	33124: {
@@ -369,7 +419,6 @@ var COINS = {
 	},
 	16000: {
 		name: "CCX",
-		algo_class: "cn/ccx",
 		divisor: 1000000,
 		url: "https://explorer.conceal.network",
 		time: 120,
@@ -377,7 +426,7 @@ var COINS = {
 };
 
 /*--------------------------------------*/
-/*-----End of Customization Section-------*/
+/*-----End of Customization Section------- (You can customize the rest, but shouldn't need to) */
 /*--------------------------------------*/
 
 var addr = UrlVars().addr || '',
@@ -559,7 +608,7 @@ document.body.addEventListener('click', function(e){
 			}else if(id[i] === '.nav'){
 				var tar = el.getAttribute('data-tar');
 				if (tar == 'old') {
-					window.location.href = 'https://c3pool.com/cn/oldui/#/dashboard';
+					window.location.href = 'https://c3pool.com/oldui';
 				} else {
 					Navigate(tar);
 				}
@@ -641,7 +690,7 @@ function init(){
 		ft += '<span class="nav" data-tar="'+m+'">'+$$.nav[m]+'</span>';
 		i++;
 	}
-	ft += ' &middot; <span class="nav" data-tar="old">旧网站</span>';
+	ft += ' &middot; <span class="nav" data-tar="old">Old UI</span>';
 	document.querySelector('#HeadMenu select').innerHTML = mn;
 	document.getElementById('FootR').innerHTML = ft;
 	
@@ -674,7 +723,7 @@ function init(){
 		$C.AddrField.value = addr;
 		$C.AddrField.blur();
 	}else{
-		$C.AddrField.setAttribute('placeholder', '填写你的 '+$Q.cur.nme+' 地址...');
+		$C.AddrField.setAttribute('placeholder', 'Your '+$Q.cur.nme+' Address...');
 	}
 	
 	if(mde === 'l' && pref && pref.charAt(0) === 'D'){
@@ -699,19 +748,19 @@ function ErrAlert(tar, err){
 	}else{
 		var msg = '',
 			iserr = 'C4',
-			err_msg = '尝试刷新，并检查您的网络.';
+			err_msg = 'Try refreshing, check your connection; otherwise we&#039;ll be back up soon.';
 		
 		if(tar === 'NetStats'){
-			msg = '网络API连接错误';
+			msg = 'Network API Connection Error';
 			if(n != null) n.classList.add('o3');
 
 		}else if(tar === 'MinerGraph'){
 			if(err === 'NoData'){
 				iserr = 'C2',
-				msg = '无可用数据';
-				err_msg = '矿工连接时将显示统计信息.';
+				msg = 'No Data Available';
+				err_msg = 'Stats will appear when miner is active.';
 			}else{
-				msg = '矿工API连接错误';
+				msg = 'Miner API Connection Error';
 			}
 			if(m != null) m.classList.add('o3');
 			if(w != null) w.classList.add('o3');
@@ -1034,26 +1083,26 @@ function Dash_load(typ){
 					api('workers', addr).then(function(){
 						if (!is_home_page()) return;
 						var wcn = ($A[addr].wrkrs && numObj($A[addr].wrkrs) > 0) ? numObj($A[addr].wrkrs) : 0,
-							plr = (wcn === 1) ? '' : '工';
+							plr = (wcn === 1) ? '' : 's';
 							
-						document.getElementById('MinerWorkerCount').innerHTML = wcn+' 个矿'+plr;
+						document.getElementById('MinerWorkerCount').innerHTML = wcn+' Worker'+plr;
 						l.classList.remove('hide');
 						Workers_init();
 					}).catch(function(err){console.log(err)});
 				}else{
 					Dash_reset();
 					m.innerHTML =
-						'<div class="MinerMsg C3'+mde+'"><div class="txtmed">未知地址，请检查或等待</div><div class="LR80 txt shim10">' +
-						'如果您已提交了第一份计算结果，请耐心等待，一两分钟即可更新. ' +
-						'如果您的shares被拒绝，请访问 <u class="nav C1" data-tar="help">帮助部分.</u><br><br>' +
-						'您也可以尝试使用以下方法，点击 <div id="WebMinerBtn" class="BtnElem C0'+mde+' txttny C1bk C2bk_hov"></div> 按钮在此浏览器中进行挖矿，但是网页挖矿的性能非常的低.<br><br>' +
-						'您还可以通过按以下按钮，查看在大多数情况下足够好的通用CPU挖矿一键设置脚本.<div class="shim10"></div><div id="MinerSetupScripts" class="LR85"></div><br><br>' +
-						'矿工参考设置信息:<br>' +
+						'<div class="MinerMsg C3'+mde+'"><div class="txtmed">Address Not Found</div><div class="LR80 txt shim10">' +
+						'If you&#039;ve submitted your first share, be patient, it may take a minute or two to update. ' +
+						'If your shares are being rejected, visit the <u class="nav C1" data-tar="help">help section.</u><br><br>' +
+						'You can also try to run web miner in this browser using <div id="WebMinerBtn" class="BtnElem C0'+mde+' txttny C1bk C2bk_hov"></div> button but it will not give you full performance of standalone miner.<br><br>' +
+						'You can also see generic CPU miner setup script that is good enough in most cases by pressing the button below.<div class="shim10"></div><div id="MinerSetupScripts" class="LR85"></div><br><br>' +
+						'Standalone miner reference setup info:<br>' +
 							'Pool: <b>mine.c3pool.com</b><br>' +
 							'Port: <b>13333</b><br>' + 
 							'User: ' + addr + '<br><br>' +
-							'对于高收益币种利润切换，请使用 <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">xmrig-C3</a> ' +
-							'和 <a href="https://github.com/C3Pool/xmr-node-proxy" class="C1 hov" target="_blank">算法切换挖矿代理</a> 如果你有超过50台矿工，请考虑使用它.<br>' +
+							'For top profit algo switching mining use <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">our version of XMRig miner</a> ' +
+							'and <a href="https://github.com/C3Pool/xmrig-proxy/releases" class="C1 hov" target="_blank">algo switching mining proxy</a> if your have many miners.<br>' +
 						'</div></div>';
 					l.classList.add('hide');
 					WebMinerSetBtn();
@@ -1068,15 +1117,15 @@ function Dash_load(typ){
 	}else{
 		Dash_reset();
 		m.innerHTML =
-			'<div class="MinerMsg C3'+mde+'"><div class="txtmed">尊敬的矿工，欢迎您加入国内首家CPU挖矿综合服务平台 ' + $Q.pool.nme +'</div><div class="LR80 txt shim10">' +
-			'访问 <u class="nav C1" data-tar="help">常见问题</u> 进行设置，然后输入您的 '+$Q.cur.nme+' 地址. ' +
-			'挖矿软件提交算力后，您的统计信息将显示在此处.<br><br>' +
-			'矿工参考设置信息:<br>' +
+			'<div class="MinerMsg C3'+mde+'"><div class="txtmed">Welcome to ' + $Q.pool.nme +'</div><div class="LR80 txt shim10">' +
+			'Visit the <u class="nav C1" data-tar="help">help section</u> to get setup, then enter your '+$Q.cur.nme+' address above. ' +
+			'After you&#039;ve submitted a share, your stats will appear here.<br><br>' +
+			'Standalone miner reference setup info:<br>' +
 				'Pool: <b>mine.c3pool.com</b><br>' +
 				'Port: <b>13333</b><br>' +
-				'User: <b>你的门罗钱包地址</b><br><br>' +
-				'对于高收益币种利润切换，请使用 <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">xmrig-C3</a> ' +
-				'和 <a href="https://github.com/C3Pool/xmr-node-proxy" class="C1 hov" target="_blank">算法切换挖矿代理</a> 如果你有超过50台矿工，请考虑使用它.<br>' +
+				'User: <b>Your XMR wallet address</b><br><br>' +
+				'For top profit algo switching mining use <a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">our version of XMRig miner</a> ' +
+				'and <a href="https://github.com/C3Pool/xmrig-proxy/releases" class="C1 hov" target="_blank">algo switching mining proxy</a> if your have many miners.<br>' +
 			'</div></div>';
 	}
 }
@@ -1159,8 +1208,8 @@ function Workers_init(){		///check this, getting called alot
 			ky = '',
 			blkclss = '',
 			ins = '<div id="WorkerSortGroup" class="hide txttny C2">'+
-				'<div id="WorkerSortName" class="C2bk C0fl'+mde+'" title="按工人的姓名对他们进行排序" data-ord="D">'+$I.sort+'</div>'+
-				'<div id="WorkerSortRate" class="C2bk C0fl'+mde+'" title="按算力对工人进行排序" data-ord="D">'+$I.sort+'</div>'+
+				'<div id="WorkerSortName" class="C2bk C0fl'+mde+'" title="Sort workers by their name" data-ord="D">'+$I.sort+'</div>'+
+				'<div id="WorkerSortRate" class="C2bk C0fl'+mde+'" title="Sort workers by their hashrate" data-ord="D">'+$I.sort+'</div>'+
 			'</div>'+
 			'<div class="WingPanel">';
 		
@@ -1296,8 +1345,8 @@ function Workers_detail(xid){
 				'<div class="BoxL center">' + HashConvStr(Rnd(avg / cnt, 0)) + '</div>'+
 				'<div class="BoxR center">'+AgoTooltip(d.last, 'y')+'</div>'+
 				'<div class="pbar shim4"></div>'+
-				'<div class="BoxL txttny C2 center">平均 '+(timestart == maxtime ? "n/a" : AgoTooltip(timestart))+'</div>'+
-				'<div class="BoxR txttny C2 center">最后提交算力</div>'+
+				'<div class="BoxL txttny C2 center">Avg '+(timestart == maxtime ? "n/a" : AgoTooltip(timestart))+'</div>'+
+				'<div class="BoxR txttny C2 center">Last Share</div>'+
 				'<div class="shim10"></div>'+
 				'<div class="BoxL center">'+Num(d.hashes)+'</div>'+
 				'<div class="BoxR center">'+Num(d.val)+' / '+Num(d.inv)+'</div>'+
@@ -1333,8 +1382,8 @@ function MinerPayments(typ){
 		ins +=	'<div class="LR50 shimtop20 C0'+mde+' txtmed center">'+
 				'<table class="C3l noborder"><tr>'+
 					'<td width="50%" class="center">'+
-						'<input type="text" id="AutoPayFld" class="center txt C0bk'+mde+' C3'+mde+' C1br" autocomplete="off" placeholder="自动支付金额...">'+
-						'<div class="pbar"></div><span class="txttny C2 noselect">自动支付 ' + $Q.cur.sym + ' 限额</span>'+
+						'<input type="text" id="AutoPayFld" class="center txt C0bk'+mde+' C3'+mde+' C1br" autocomplete="off" placeholder="Auto Pay Amount...">'+
+						'<div class="pbar"></div><span class="txttny C2 noselect">Auto pay ' + $Q.cur.sym + ' threshold</span>'+
 					'</td>'+
 					'<td width="50%" class="center">'+
 						'<div id="AutoPayBtn" class="BtnElem txtmed C0'+mde+' C1bk C2bk_hov o5">'+$$.trn.set+'</div>'+
@@ -1349,19 +1398,19 @@ function MinerPayments(typ){
 				lbl = $$.trn[email_enabled ? 'eml_on' : 'eml_off'];
 			ins +=	'<div class="LR50 shimtop20 C0'+mde+' txtmed center">'+
 				'<div class="Split3L">'+
-					'<input type="text" id="EmailFROM" class="center txt C0bk'+mde+' C3'+mde+' C1br" placeholder="输入旧邮箱地址">'+
-					'<div class="pbar"></div><span class="txttny C2 noselect">旧邮箱地址</span>'+
+					'<input type="text" id="EmailFROM" class="center txt C0bk'+mde+' C3'+mde+' C1br" placeholder="Change email FROM">'+
+					'<div class="pbar"></div><span class="txttny C2 noselect">Change email FROM</span>'+
 				'</div>'+
 				'<div class="Split3R">'+
-					'<input type="text" id="EmailTO" class="center txt C0bk'+mde+' C3'+mde+' C1br" placeholder="输入新邮箱地址">'+
-					'<div class="pbar"></div><span class="txttny C2 noselect">新邮箱地址</span>'+
+					'<input type="text" id="EmailTO" class="center txt C0bk'+mde+' C3'+mde+' C1br" placeholder="Change email TO">'+
+					'<div class="pbar"></div><span class="txttny C2 noselect">Change email TO</span>'+
 				'</div>'+
 				'<div class="Split3">'+
 					'<div id="EmailSubscribeBtn" class="BtnElem DiscMde C1bk C2bk_hov">'+
 						'<div class="DiscIcon C0bk'+mde+' C1fl">'+check+'</div>'+
 						'<span id="EmailSubscribeLbl" class="C0'+mde+' txtmed">'+lbl+'</span>'+
 					'</div>'+
-					'<div class="pbar"></div><span class="txttny C2 noselect">修改邮箱地址</span>'+
+					'<div class="pbar"></div><span class="txttny C2 noselect">and change email</span>'+
 				'</div>'+
 				'<div class="hbar shim10"></div>'+
 				'</div>';
@@ -1429,20 +1478,20 @@ function MinerSetupScriptsBtn(show){
 	miner_setup_open = show;
 	var s = document.getElementById('MinerSetupScripts');
 	if (show) {
-		var lin_cmd = escapeHtml("curl -s -L http://download.c3pool.com/xmrig_setup/raw/master/setup_c3pool_miner.sh | bash -s " + addr);
+		var lin_cmd = escapeHtml("curl -s -L https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/setup_c3pool_miner.sh | bash -s " + addr);
 		var lin_hlp = escapeHtml('Copy and execute under Linux shell. User with passwordless sudo access is recommended.');
-		var win_cmd = escapeHtml("powershell -Command \"$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += '.bat'; $wc.DownloadFile('http://download.c3pool.com/xmrig_setup/raw/master/setup_c3pool_miner.bat', $tempfile); & $tempfile " + addr + "; Remove-Item -Force $tempfile\"");
+		var win_cmd = escapeHtml("powershell -Command \"$wc = New-Object System.Net.WebClient; $tempfile = [System.IO.Path]::GetTempFileName(); $tempfile += '.bat'; $wc.DownloadFile('https://raw.githubusercontent.com/C3Pool/xmrig_setup/master/setup_c3pool_miner.bat', $tempfile); & $tempfile " + addr + "; Remove-Item -Force $tempfile\"");
 		var win_hlp = escapeHtml('Copy and execute under "Command Prompt". Run "Command Prompt" as Administrator is recommended if possible.');
-		s.innerHTML =	'<div id="MinerSetupHideBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">隐藏一键挖矿安装脚本</div>' +
+		s.innerHTML =	'<div id="MinerSetupHideBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">Hide Miner Setup Scripts</div>' +
 				'<div class="shim10"></div>' +
 				'<div class="center"><textarea id="WinCmdTextArea" wrap="soft" class="W95 txt C0bkl C3l C1br" readonly>' + win_cmd + '</textarea>' +
-				'<div class="pbar"></div><span class="txttny C2 noselect" title="' + win_hlp + '">Windows安装命令</span></div>'+
+				'<div class="pbar"></div><span class="txttny C2 noselect" title="' + win_hlp + '">Windows setup command</span></div>'+
 				'<div class="shim10"></div>' +
 				'<div class="center"><textarea id="LinCmdTextArea" wrap="soft" class="W95 txt C0bkl C3l C1br" readonly>' + lin_cmd + '</textarea>' +
-				'<div class="pbar"></div><span class="txttny C2 noselect"title="' + lin_hlp + '">Linux安装命令</span></div>';
+				'<div class="pbar"></div><span class="txttny C2 noselect"title="' + lin_hlp + '">Linux setup command</span></div>';
 		resize_texareas();
 	} else {
-		s.innerHTML = '<div id="MinerSetupShowBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">显示一键挖矿安装脚本</div>';
+		s.innerHTML = '<div id="MinerSetupShowBtn" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">Show Miner Setup Scripts</div>';
 	}
 }
 var web_miner_start = false; // one time check the first time web miner button is shown
@@ -1533,7 +1582,7 @@ function AutoPayCheck(){
 function MinerPaymentHistory(pge){
 	pge = (pge > 1) ? pge : 1;
 	document.getElementById('MinerPayments').className = 'OpenedBig';
-	document.getElementById('PaymentHistory').innerHTML = '<div class="LR85"><div id="PaymentHistoryBtnClose" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">关闭支付历史信息</div>'+
+	document.getElementById('PaymentHistory').innerHTML = '<div class="LR85"><div id="PaymentHistoryBtnClose" class="BtnElem C0'+mde+' txtmed C1bk C2bk_hov">Close Payment History</div>'+
 		'<div id="MinerPaymentsTable" class="C3'+mde+'">'+$I.load+'</div></div>'+
 		'<input type="hidden" id="MinerPaymentsPage" value="'+pge+'">';
 		
@@ -1550,7 +1599,7 @@ function dta_Coins(){
 		var active_ports = {};
 		$D.poolstats.activePorts.forEach(function(port) { active_ports[port] = 1; });
 		Object.keys(COINS).sort(function (a, b) { return (COINS[a].name < COINS[b].name) ? -1 : 1 }).forEach(function(port) {
-			if (!(port in $D.netstats)) return;
+			if (!(port in $D.netstats) || !(port in $D.poolstats.coinComment)) return;
 			var coin = COINS[port];
 			var port_hashrate = $D.poolstats.portHash[port] ? $D.poolstats.portHash[port] : 0;
 			var hash_factor   = coin.factor ? coin.factor : 1;
@@ -1574,7 +1623,7 @@ function dta_Coins(){
 			});
 			$D.coins[0].push(table_coin);
 		});
-		document.getElementById('PageTopL').innerHTML = 'PPLNS窗口时长: ' + Rnd($D.poolstats.pplnsWindowTime / 3600, 2, 'txt') + ' 小时';
+		document.getElementById('PageTopL').innerHTML = 'Current PPLNS window length: ' + Rnd($D.poolstats.pplnsWindowTime / 3600, 2, 'txt') + ' hours';
 		Tbl('PageBot', 'coins', 0, 0);
 	}).catch(function(err){console.log(err)}); }).catch(function(err){console.log(err)});
 }
@@ -1594,14 +1643,14 @@ function dta_Blocks(pge){
 				var eff = 0, bnum = 0;
 				if ($D.blocks[pge]) $D.blocks[pge].forEach(function(b) { eff += b.shares / b.diff; ++ bnum; });
 				var eff_perc = bnum ? Rnd(eff / bnum * 100) : 0;
-				document.getElementById('BlockEffort').innerHTML = '(<span class="'+(eff_perc > 100 ? 'C4' : 'C5')+'">'+Perc(eff_perc)+'</span> 当前页面上的幸运度)'
+				document.getElementById('BlockEffort').innerHTML = '(<span class="'+(eff_perc > 100 ? 'C4' : 'C5')+'">'+Perc(eff_perc)+'</span> effort on this page)'
 			}).catch(function(err){console.log(err)});
 	}).catch(function(err){console.log(err)}); }).catch(function(err){console.log(err)});
 }
 function dta_Payments(pge){
 	document.getElementById('PageBot').innerHTML = $I.load;
 	api('poolstats').then(function(){
-		document.getElementById('PageTopL').innerHTML = Num($D.poolstats.totalPayments)+' 次支付到 '+Num($D.poolstats.totalMinersPaid)+' 矿工';
+		document.getElementById('PageTopL').innerHTML = Num($D.poolstats.totalPayments)+' Payments to '+Num($D.poolstats.totalMinersPaid)+' Miners';
 		api('poolpay', pge, poolpay_page_size).then(function(){
 			Tbl('PageBot', 'poolpay', pge, poolpay_page_size);
 		}).catch(function(err){console.log(err)});
@@ -1611,59 +1660,59 @@ function dta_Help(){
 	document.getElementById('PageTopL').innerHTML = $$.hlp.head;
 	var ins = '<p>' + $$.hlp.text + '</p>'+
 		'<div class="helpgroup">'+
-			'<div class="helptitle txtbig">第一步 - 安装钱包与注册钱包地址<div class="btnback">'+$I.arrow+'</div></div>'+
-			'<div class="helpteaser">如果您需要下载钱包和注册钱包，请从此处开始.</div>'+
+			'<div class="helptitle txtbig">Step 1 - Install Wallet & Create Address<div class="btnback">'+$I.arrow+'</div></div>'+
+			'<div class="helpteaser">Start here if you need a Monero address and wallet.</div>'+
 			'<div class="helpcontent hide">'+
-				'<p>建议使用 <a href="https://www.getmonero.org/downloads/" target="_blank" class="C1 hov">官方Monero钱包</a>. </p>'+
+				'<p>The <a href="https://www.getmonero.org/downloads/" target="_blank" class="C1 hov">Official Monero Wallet</a> is recommended. Monero Outreach&#039;s <a href="https://www.monerooutreach.org/stories/monero_wallet_quickstart.php" class="C1 hov" target="_blank">Wallet Guide</a> has a list of other wallet options including paper wallets.</p>'+
 			'</div>'+
 		'</div>'+
 		'<div class="helpgroup">'+
-			'<div class="helptitle txtbig">第二步 - 安装挖矿工具<div class="btnback">'+$I.arrow+'</div></div>'+
-			'<div class="helpteaser">安装挖门罗币所需的软件.</div>'+
+			'<div class="helptitle txtbig">Step 2 - Install Mining Software<div class="btnback">'+$I.arrow+'</div></div>'+
+			'<div class="helpteaser">Install the software needed to mine Monero.</div>'+
 			'<div class="helpcontent hide">'+
-				'<p>选择最适合您的硬件的矿工，并按照其安装说明进行操作. 如果需要帮助，请访问 <a href="https://jq.qq.com/?_wv=1027&k=mPOZ9qR4" class="C1 hov">QQ社群</a>.</p>' +
-					'&nbsp;<a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">C3 XMRig</a>: 在CPU和GPU上进高收益币种自动切换（Nvidia，AMD）<br>' +
-					'&nbsp;<a href="https://github.com/xmrig/xmrig/releases" class="C1 hov" target="_blank">XMRig</a>: 用于在 CPU 和 GPU 上进行挖矿（Nvidia，AMD）<br>' +
-					'&nbsp;<a href="https://github.com/fireice-uk/xmr-stak/releases" class="C1 hov" target="_blank">XMR-Stak/RX</a>: 用于 CPU 矿工<br>' +
-					'&nbsp;<a href="https://github.com/C3Pool/meta-miner" class="C1 hov" target="_blank">mm.js</a>: 用于算法切换矿工包装器（高级）<br><br>' +
-				'<p>Use <a href="https://github.com/C3Pool/xmr-node-proxy" class="C1 hov" target="_blank">算法切换挖矿代理</a> 如果你有超过50台矿工，请考虑使用它.</p>' +
+				'<p>Select the miner that best suits your hardware and follow their installation instructions. If you need help, visit <a href="https://discordapp.com/invite/jXaR2kA" class="C1 hov">Discord</a>.</p>' +
+					'&nbsp;<a href="https://github.com/C3Pool/xmrig-C3/releases" class="C1 hov" target="_blank">C3 XMRig</a>: for top profit algo switching mining on CPU and GPU (Nvidia, AMD)<br>' +
+					'&nbsp;<a href="https://github.com/xmrig/xmrig/releases" class="C1 hov" target="_blank">XMRig</a>: for mining on CPU and GPU (Nvidia, AMD)<br>' +
+					'&nbsp;<a href="https://github.com/fireice-uk/xmr-stak/releases" class="C1 hov" target="_blank">XMR-Stak/RX</a>: for mining on CPU<br>' +
+					'&nbsp;<a href="https://github.com/C3Pool/meta-miner" class="C1 hov" target="_blank">mm.js</a>: for algo switching miner wrapper (advanced)<br><br>' +
+				'<p>Use <a href="https://github.com/C3Pool/xmrig-proxy/releases" class="C1 hov" target="_blank">algo switching mining proxy</a> if you have many miners.</p>' +
 			'</div>'+
 		'</div>'+
 		'<div class="helpgroup">'+
-			'<div class="helptitle txtbig">第三步 - 配置挖矿软件<div class="btnback">'+$I.arrow+'</div></div>'+
-			'<div class="helpteaser">选择一个地址和端口并配置您的矿工.</div>'+
+			'<div class="helptitle txtbig">Step 3 - Configure Settings<div class="btnback">'+$I.arrow+'</div></div>'+
+			'<div class="helpteaser">Select a pool server and port and configure you miner.</div>'+
 			'<div class="helpcontent hide">'+
-				'<p>每个挖矿软件都有其自己的配置，但是它们都会要求相同的信息：</p>'+
-				'<p><b>你的XMR钱包地址</b><br>通常这会被标记为user，但请查看说明.</p>'+
-				'<p><b>Pool Address</b><br>矿工将需要一个URL和一个端口，像这样: mine.c3pool.com:13333</p>'+
+				'<p>Each mining software will have it&#039;s own config, but they will all ask for the same information:</p>'+
+				'<p><b>Your Monero Address</b><br>Often this will be labeled username, but check the instructions.</p>'+
+				'<p><b>Pool Address</b><br>The miner will want a url and a port, like this: mine.c3pool.com:13333</p>'+
 				'<p><table class="txtsmall C3'+mde+'"><tr>'+
 					'<td>'+
-						'<p>端口说明:</p>'+
-						'<ul><li><b>13333</b>: 古老的 CPU</li><li><b>15555</b>: 先进的 CPU</li><li><b>23333</b>: CPU 矿场</li><li><b>33333</b>: SSL/TLS</li><li><b>80</b>: 非常古老的 CPU (1000 diff)</li></ul>'+
+						'<p>Port descriptions:</p>'+
+						'<ul><li><b>13333</b>: Old CPU/GPU</li><li><b>15555</b>: Modern CPU/GPU</li><li><b>23333</b>: CPU/GPU farm</li><li><b>33333</b>: SSL/TLS</li><li><b>80</b>: Very old CPU (1000 diff)</li></ul>'+
 					'</td>'+
 					'<td>'+
-						'<p>如果您无法通过防火墙, 尝试以下操作<br>(在你的钱包地址后面+128000难度):</p>'+
+						'<p>If you can&#039;t get through firewall, try these<br>(specify +128000 difficulty after your Monero Address):</p>'+
 						'<ul><li><b>80</b>: Firewall bypass</li><li><b>443</b>: Firewall bypass w/SSL/TLS</li></ul>'+
 					'</td>'+
 				'</tr></table></p>'+
-				'<p><b>选填</b><br>您还可以通过配置矿工编号或固定难度.</p>'+
-				'<p>钱包地址<br><i>(e.g. xmrig.exe -u 43T...sUW -p <b>worker1</b>)</i></p>'+
-				'<p>固定的矿工挖矿难度难度128000<br><i>(e.g. xmrig.exe -u 43T...sUW<b>+128000</b> -p worker1)</i></p>'+
+				'<p><b>Optional Fields</b><br>You can also set worker names or fixed difficulty through the configuration.</p>'+
+				'<p>Standard wallet address<br><i>(e.g. xmrig.exe -u 43T...sUW -p <b>worker1</b>)</i></p>'+
+				'<p>Fixed difficulty of 128000 for the worker<br><i>(e.g. xmrig.exe -u 43T...sUW<b>+128000</b> -p worker1)</i></p>'+
 			'</div>'+
 		'</div>'+
 		'<div class="helpgroup">'+
-			'<div class="helptitle txtbig">第四步 - 开挖挖矿<div class="btnback">'+$I.arrow+'</div></div>'+
-			'<div class="helpteaser">启动矿工并了解更多信息.</div>'+
+			'<div class="helptitle txtbig">Step 4 - Start Mining<div class="btnback">'+$I.arrow+'</div></div>'+
+			'<div class="helpteaser">Launch the miner and learn more.</div>'+
 			'<div class="helpcontent hide">'+
-				'<p>矿池使用PPLNS来确定收益. 它有助于打击独裁者，并确保为矿工带来良好的收益.</p>'+
-				'<p><b>' + Perc(0) + '</b> 矿池手续费(是的，我们不收费)</p>'+
-				'<p><b>' + $Q.pay.min_auto + '</b> XMR 最小支付额度</p>'+
-				'<p><b>' + $Q.cur.conf + '</b> 区块确认时间</p>'+
+				'<p>This pool uses PPLNS to determine payouts. It helps to combat pool hopping and ensures a good payout for miners.</p>'+
+				'<p><b>' + Perc(0) + '</b> (yes, Zero!) Pool Fee</p>'+
+				'<p><b>' + $Q.pay.min_auto + '</b> XMR Minimum Payout</p>'+
+				'<p><b>' + $Q.cur.conf + '</b> Block Confirmation Time</p>'+
 			'</div>'+
 		'</div>'+
 		'<div class="helpgroup">'+
-			'<div class="helptitle txtbig">帮助<div class="btnback">'+$I.arrow+'</div></div>'+
-			'<div class="helpteaser">检查您的问题是否在这里有答案.</div>'+
+			'<div class="helptitle txtbig">FAQ<div class="btnback">'+$I.arrow+'</div></div>'+
+			'<div class="helpteaser">Check if you have your question answered here.</div>'+
 			'<div class="helpcontent hide">';
 
 	$$.faq.forEach(function(faq) {
@@ -1948,7 +1997,7 @@ function Tbl(tar, typ, pge, lim){
 							if (is_main_port) {
 								var b = $Q.cur.conf - ($D.netstats.height - d.height);
 								if (b > 0) {
-									val = (b * coin.time / 60) + " 分钟";
+									val = (b * coin.time / 60) + " Mins Left";
 								} else if (b > -10) {
 									val = "Soon";
 								} else {
@@ -2133,7 +2182,7 @@ function Graph_Miner(){
 
 		//MinerHash Avg
 		var	avg_y = Rnd(height_pad - avg / max * height_pad, 2),
-			txt = HashConvStr(avg) + ' 平均 ' + Ago(timestart),
+			txt = HashConvStr(avg) + ' Avg ' + Ago(timestart),
 			txt_w = txt.length * 5.4;
 		if (hshx === "hsh2") $D.miner_hash_avg = avg;
 			
@@ -2150,9 +2199,12 @@ function Graph_Miner(){
 		ins += '</svg>';
 		document.getElementById('MinerGraph').innerHTML = ins;
 		Dash_calc();
-		api('poolstats').then(function(){
-			document.getElementById('PendingPay').innerHTML = Rnd($D.poolstats.pending * $D.miner_hash_avg / $D.poolstats.hashRate, 6, 'txt');
-		});
+		api('account').then(function(){api('poolstats').then(function(){
+			var pending_factor = Math.max(($Q.pending_days*24*60*60 - (now - $A[addr].last)) / ($Q.pending_days*24*60*60), 0);
+			document.getElementById('PendingPay').innerHTML = Rnd(
+				$D.poolstats.pending * $D.miner_hash_avg / $D.poolstats.hashRate * pending_factor,
+                        6, 'txt');
+		}); });
 		GraphLib_ToolTipListener();
 	}else{
 		ErrAlert('MinerGraph', 'NoData');
@@ -2196,7 +2248,7 @@ function Graph_Worker(xid){
 				yL = y;
 			}
 		}
-		ins += '<path fill="url(#F)" stroke-width="1.25" class="C2st" d="'+GraphLib_Bezier(points)+'M-3,'+yL+' -3,'+height3+' '+width3+','+height3+' '+width3+','+yR+'" />';		
+		ins += '<path fill="url(#F)" stroke-width="1.25" class="C2st" d="'+GraphLib_Bezier(points)+'M-3,'+yL+' -3,'+height3+' '+width3+','+height3+' '+width3+','+yR+'" />';
 	}
 	WorkerChart.innerHTML = ins+'</svg>';
 }
@@ -2351,19 +2403,19 @@ function numObj(o){
 function Ago(tme, lbl){
 	var t = now - parseInt(tme), r = 0;
 	if(t < 60){
-		t = t+' 秒'; //t = t+' Sec';
+		t = t+' Sec';
 	}else if(t <= 3600){
-		t = Rnd(t / 60)+' 分钟'; //t = Rnd(t / 60)+' Min';
+		t = Rnd(t / 60)+' Min';
 	}else if(t <= 86400){
 		r = Rnd(t / 60 / 60);
-		t = r+' 小时'; //t = r+' Hr';
-		if(r > 1) t += ''; //if(r > 1) t += 's';
+		t = r+' Hr';
+		if(r > 1) t += 's';
 	}else{
 		r = Rnd(t / 60 / 60 / 24);
-		t = r+' 天'; //t = r+' Day';
-		if(r > 1) t += '';  //if(r > 1) t += 's';
+		t = r+' Day';
+		if(r > 1) t += 's';
 	}
-	if(lbl === 'y') t += ' 以前';  //if(lbl === 'y') t += ' Ago';
+	if(lbl === 'y') t += ' Ago';
 	return t;
 }
 function Time(tme){
@@ -2423,6 +2475,8 @@ function hashToLink(hash, port, type) {
 	var url = port in COINS ? COINS[port].url : "";
 	if (port == 11898) {
 		return '<a class="C1 hov" target="_blank" href="' + url + '/block.html?hash=' + hash + '">' + hash + '</a>';
+        } else if (port == 11812) {
+		return '<a class="C1 hov" target="_blank" href="' + url + '/' + type + '?' + type + "_info=" + hash + '">' + hash + '</a>';
 	} else {
 		return '<a class="C1 hov" target="_blank" href="' + url + '/' + type + '/' + hash + '">' + hash + '</a>';
 	}
@@ -2448,7 +2502,7 @@ function HashConvStr(h, unit){
 	return h.num + ' ' + (unit ? h.unit.replace(/H\//, unit + '/') : h.unit);
 }
 function InvalidBlock(){
-	return '<span class="C4" title="这是孤儿区块，这意味着不会获得任何奖励.">无效</span>';
+	return '<span class="C4" title="This is orphan block so there will be no payment for it. It can happen sometimes naturally.">Orphaned</span>';
 }
 function SynchTime(t){
 	if(t > now) now = t + 3;
