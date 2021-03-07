@@ -30,7 +30,7 @@ var	mde = 'l',
 		pay: {
 			min_auto:	0.003,											//minimum for automatic threshold
 			def_auto:	0.005,											//minimum for automatic threshold
-			max_fee:	0.0004,											//max fee (for min_auto)
+			max_fee:	0.0001,											//max fee (for min_auto)
 			zero_fee_pay:	4,											//theshold that makes fee to be zero
 			dec_auto:	4											//decimal places for threshold
 		}
@@ -137,6 +137,14 @@ var	mde = 'l',
 					'<li><b>us.c3pool.com</b>: USA</li>'+
 				'</ul>'
 			},
+			
+			{ q:	'Why xmrig miner shows so high ping to C3Pool pool nodes?',
+			  a:	'xmrig miner includes time needed to verify your share into ping number it reports. '+
+                                'Pool uses external share validator for non-critical shares (the ones that cannot be used to find a block), '+
+                                'so that is why ping reported by xmrig is high. Critical shares are validated locally, '+
+                                'so that guarantees that there will be no external share validator delay for them and no orphaned blocks because of this. '+
+                                'So for our pool usual ping utility provides more accurate results.'
+			},
 
 			{ q:	'What are available pool ports?',
 			  a:	'Pool support many ports that are only different by their starting difficulty. Please select them based on your miner speed:'+
@@ -150,13 +158,10 @@ var	mde = 'l',
 					'<li><b>19999</b>: 100000 diff (auto-adjust)</li>'+
 					'<li><b>23333</b>: 1000000 diff (Proxy/NiceHash)</li>'+
 					'<li><b>33333</b>: 15000 diff (SSL)</li>'+
+					'<li><b>43333</b>: 2G diff (ETH port)</li>'+
+					'<li><b>53333</b>: 2G diff (ETH port/SSL/TLS)</li>'+
 				'</ul>'
 			},
-/*
-			{ q:	'Can I mine here using Tor .onion address?',
-			  a:	'Yes. You can mine on MoneroOcean pool using <b>mo2tor2amawhphlrgyaqlrqx7o27jaj7yldnx3t6jip3ow4bujlwz6id.onion</b> Tor address (and usual <b>10001</b>-<b>18192</b> http ports).'
-			},
-*/
 
 			// Pool UI 
 
@@ -193,38 +198,7 @@ var	mde = 'l',
 			{ q:	'Am I payed only for the coin blocks I mine?',
 			  a:	'No. Pool pays you your share from every block we find as before. Your pay share like before is based on amount of hashes you submitted in the PPLNS window on the moment block is found. In particulair that means that your are payed even after you stopped mining as long as your shares are within PPLNS window.'
 			},
-/*
-			{ q:	'How can I verify my PPLNS reward for a particular XMR block?',
-			  a:	'For each XMR block for the last month pool stores CSV file with shares used to determine block rewards to all miners on the pool. You can access this file using link from XMR height value or from <b>https://block-share-dumps.moneroocean.stream/&quot;block hash&quot;.cvs.xz</b> location directly. Each line of this file corresponds to submitted share and has the following fields:'+
-				'<ul>'+
-					'<li><b>part_of_xmr_address</b> - last 16 characters of your XMR address used on the pool</li>'+
-					'<li><b>timestamp</b>: Linux timestamp in hex format</li>'+
-					'<li><b>raw_diff</b>: difficulty of this share</li>'+
-					'<li><b>count</b>: number of shares merged into this one (with cumulative raw_diff)</li>'+
-					'<li><b>coin</b>: name of the coin</li>'+
-					'<li><b>xmr_diff</b>: diff normalized to XMR profits using current profit factor for that coin</li>'+
-					'<li><b>xmr_diff_payed</b>: can be omitted if equal to xmr_diff</li>'+
-				'</ul>'+
-				'You can also use calc_mo_cvs.js script to parse this file like this on Linux:<br>'+
-					'<b>wget https://raw.githubusercontent.com/MoneroOcean/nodejs-pool/master/block_share_dumps/calc_mo_cvs.js<br>'+
-					'wget -O - https://block-share-dumps.moneroocean.stream/4900622681b754d56d5c93e1e4d010f6fc2097e2f2c1a0809e30b09b13f12472.cvs.xz | unxz -c | node calc_mo_cvs.js 89TxfrUmqJJcb1V124WsUzA78Xa3UYHt7Bg8RGMhXVeZYPN8cE5CZEk58Y1m23ZMLHN7wYeJ9da5n5MXharEjrm41hSnWHL<br>'+
-					'<br>'+
-					'PPLNS window size:             3.76 hours<br>'+
-					'PPLNS window size:             215549020500 xmr hashes<br>'+
-					'Pool XMR normalized hashrate:  15.94 MH/s<br>'+
-					'<br>'+
-					'Your submitted shares:         33578<br>'+
-					'Your payment:                  0.346985% (747923823 xmr hashes)<br>'+
-					'Your XMR normalized hashrate:  55.32 KH/s<br>'+
-					'<br>'+
-					'You mined these coins:<br>'+
-					' LOKI: 244825043 raw coin hashes (37.478417% of XMR normalized hashrate)<br>'+
-					' MSR: 1809000 raw coin hashes (0.182182% of XMR normalized hashrate)<br>'+
-					' TUBE: 295000 raw coin hashes (0.095110% of XMR normalized hashrate)<br>'+
-					' XHV: 359000 raw coin hashes (0.119957% of XMR normalized hashrate)<br>'+
-					' XMR: 464642699 raw coin hashes (62.124335% of XMR normalized hashrate)</b>'
-			},
-*/
+
 			// Solving issues
 
 			{ q:	'Can I have payment if I have less than <b>' + $Q.pay.min_auto + '</b> XMR?',
@@ -265,11 +239,7 @@ var	mde = 'l',
 			{ q:	'Can I split/donate hashrate of my worker between several Monero addresses?',
 			  a:	'Yes. In your miner config add <b>%percent2%xmr_wallet_address2</b> after your <b>xmr_wallet_address1</b> address and pool will split <b>percent2</b> percent of your hashrate to <b>xmr_wallet_address2</b>. For example if you want to donate <b>0.1%</b> of your hashrate to support Monero developers then just add <b>%0.1%44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A</b> after your Monero wallet address. This split happens on per worker basis, so one of your workers can has split enabled and other can work without split.'
 			},
-/*
-			{ q:	'Is this pool software open source?',
-			  a:	'Yes. It is powered by software in <a href="https://github.com/MoneroOcean/nodejs-pool" target="_blank" class="C3l hov">nodejs-pool</a> and <a href="https://github.com/MoneroOcean/moneroocean-gui" target="_blank" class="C3l hov">moneroocean-gui</a> repositories.'
-			},
-*/
+
 			{ q:	'Are you accepting cryptocurrency donations? What are pool wallet view keys?',
 			  a:	'Yes. Why not =) Every bit helps especially with zero fee mining policy we use. If for some reason you feel grateful to a degree to donate some crypto then here are addresses you can use for that. These wallets are also used by the pool to recieve block rewards, so you can double check we not skimming any blocks by using wallet view keys listed below:'+
 				'<ul>'+
@@ -351,6 +321,22 @@ var COINS = {
 		unit: "G",
 		factor: 32,
 	},
+	8766: {
+		name: "RVN",
+		divisor: 100000000,
+		url: "https://ravencoin.network",
+		time: 60,
+		unit: "H",
+		factor: 0xFFFFFFFFFFFFFFFF / 0xFF000000,
+	},
+	8545: {
+		name: "ETH",
+		divisor: 1000000000000000000,
+		url: "https://etherscan.io/",
+		time: 13,
+		unit: "H",
+		factor: 1,
+	},
 	11181: {
 		name: "AEON",
 		divisor: 1000000000000,
@@ -368,14 +354,6 @@ var COINS = {
 		divisor: 1000000000000,
 		url: "https://explorer.dero.io",
 		time: 27,
-	},
-	13102: {
-		name: "XTA",
-		divisor: 1000000000000,
-		url: "https://explorer.italo.network",
-		time: 15,
-		unit: "G",
-		factor: 48,
 	},
 	25182: {
 		name: "TUBE",
@@ -1688,7 +1666,7 @@ function dta_Help(){
 				'<p><table class="txtsmall C3'+mde+'"><tr>'+
 					'<td>'+
 						'<p>Port descriptions:</p>'+
-						'<ul><li><b>13333</b>: Old CPU/GPU</li><li><b>15555</b>: Modern CPU/GPU</li><li><b>23333</b>: CPU/GPU farm</li><li><b>33333</b>: SSL/TLS</li><li><b>80</b>: Very old CPU (1000 diff)</li></ul>'+
+						'<ul><li><b>13333</b>: Old CPU/GPU</li><li><b>15555</b>: Modern CPU/GPU</li><li><b>23333</b>: CPU/GPU farm</li><li><b>33333</b>: SSL/TLS</li><li><b>80</b>: Very old CPU (1000 diff)</li><li><b>43333</b>: ETH PORT (2G diff)</li><li><b>53333</b>: ETH SSL/TLS PORT (2G diff)</li></ul>'+
 					'</td>'+
 					'<td>'+
 						'<p>If you can&#039;t get through firewall, try these<br>(specify +128000 difficulty after your Monero Address):</p>'+
@@ -2016,7 +1994,7 @@ function Tbl(tar, typ, pge, lim){
 					break;
 				}
 				case 'bheight': val = d.port ? d.height : '<a href="https://block-share-dumps.c3pool.com/' + d.hash + '.cvs.xz">' + d.height + '</a>'; break;
-				case 'hash':	val = hashToLink(d[n], d.port ? d.port : mport, t.typ); break;
+				case 'hash':	val = hashToLink(d[n], d.port ? d.port : mport, d.port === 8545 && d.value < 2 * COINS[d.port].divisor ? "uncle" : t.typ); break;
 				default:	val = d[n];
 			}
 			ins += '<td class="'+t.cls+'">'+val+'</td>';
@@ -2477,6 +2455,8 @@ function hashToLink(hash, port, type) {
 		return '<a class="C1 hov" target="_blank" href="' + url + '/block.html?hash=' + hash + '">' + hash + '</a>';
         } else if (port == 11812) {
 		return '<a class="C1 hov" target="_blank" href="' + url + '/' + type + '?' + type + "_info=" + hash + '">' + hash + '</a>';
+	} else if (port == 8545) {
+		return '<a class="C1 hov" target="_blank" href="' + url + '/' + type + '/0x' + hash + '">' + hash + '</a>';
 	} else {
 		return '<a class="C1 hov" target="_blank" href="' + url + '/' + type + '/' + hash + '">' + hash + '</a>';
 	}
