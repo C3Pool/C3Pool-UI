@@ -1308,19 +1308,24 @@ function Workers_detail(xid){
 		api('workerdetail', xid, d.name).then(function(){
 			var avg = 0,
 				havg = 0,
+				auc = 0,
 				maxtime = 99999999999999999,
 				timestart = maxtime,
 				cnt = numObj($A[addr].wrkrs[xid].stats),
 				i = cnt;
 
 			var hshx = document.getElementById('HashSelect').value == 'raw' ? "hsh" : "hsh2";
-			while(i--){
-				avg = avg + parseInt($A[addr].wrkrs[xid].stats[i][hshx]);
+			//while(i--){
+			while(i > 1) {
+				i--;
+				auc += ($A[addr].wrkrs[xid].stats[i - 1][hshx] + $A[addr].wrkrs[xid].stats[i][hshx]) * ($A[addr].wrkrs[xid].stats[i - 1].tme - $A[addr].wrkrs[xid].stats[i].tme) / 2;
+				//avg = avg + parseInt($A[addr].wrkrs[xid].stats[i][hshx]);
 				SynchTime($A[addr].wrkrs[xid].stats[i].tme);
 				if($A[addr].wrkrs[xid].stats[i].tme < timestart) timestart = $A[addr].wrkrs[xid].stats[i].tme;
 			}
 			p.innerHTML = '<div id="WorkerPopClose" class="C1fl Btn16 Btn16Corner">'+$I.x+'</div>'+
-				'<div class="BoxL center">' + HashConvStr(Rnd(avg / cnt, 0)) + '</div>'+
+				//'<div class="BoxL center">' + HashConvStr(Rnd(avg / cnt, 0)) + '</div>'+
+				'<div class="BoxL center">' + HashConvStr(Rnd(auc / ($A[addr].wrkrs[xid].stats[0].tme - $A[addr].wrkrs[xid].stats[cnt - 1].tme), 0)) + '</div>'+
 				'<div class="BoxR center">'+AgoTooltip(d.last, 'y')+'</div>'+
 				'<div class="pbar shim4"></div>'+
 				'<div class="BoxL txttny C2 center">Avg '+(timestart == maxtime ? "n/a" : AgoTooltip(timestart))+'</div>'+
@@ -2098,6 +2103,7 @@ function Graph_Miner(){
 		cnt = numObj($H),
 		points = [],
 		pts = '',
+		auc = 0,  // area under curve
 		avg = 0,
 		max = 0,
 		yL = 0,
@@ -2107,16 +2113,19 @@ function Graph_Miner(){
 	var hshx = document.getElementById('HashSelect').value == 'raw' ? "hsh" : "hsh2";
 
 	i = cnt;
-	while(i--){
-		avg = avg + $H[i][hshx];
+	//while(i--){
+	while(i > 1) {
+		i--;
+		auc += ($H[i - 1][hshx] + $H[i][hshx]) * ($H[i - 1].tme - $H[i].tme) / 2;
+		// avg = avg + $H[i][hshx];
 		if($H[i][hshx] > max) max = $H[i][hshx];
 		if($H[i].tme < timefirst) timefirst = $H[i].tme;
 	}
 	if(max > 0){
 		if(timefirst >= timestart) timestart = timefirst;
 		max = max * 1.2;
-		avg = avg / cnt;
-		
+		// avg = avg / cnt;
+		avg = auc / ($H[0].tme - $H[cnt - 1].tme);
 		//Create Points
 		for(i = 0; i < cnt; i++){
 			var x = Rnd(right_x - (now - $H[i].tme) * (right_x / (now - timestart)), 1),
